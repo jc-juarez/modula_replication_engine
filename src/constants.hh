@@ -8,6 +8,8 @@
 #ifndef CONSTANTS_
 #define CONSTANTS_
 
+#include <string>
+
 //
 //  Unsigned 1 byte.
 //
@@ -50,7 +52,7 @@ using int32 = int;
 using int64 = long long;
 
 //
-// Status code alias.
+// Status code type alias.
 //
 using status_code = int;
 
