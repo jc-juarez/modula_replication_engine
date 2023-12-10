@@ -9,6 +9,7 @@
 #define CONSTANTS_
 
 #include <string>
+#include <stdexcept>
 
 //
 //  Unsigned 1 byte.
@@ -54,7 +55,39 @@ using int64 = long long;
 //
 // Status code type alias.
 //
-using status_code = int;
+using status_code = uint32;
+
+//
+// File descriptor alias.
+//
+using file_descriptor = int;
+
+//
+// Determines whether a file descriptor is valid.
+//
+inline
+bool
+is_file_descriptor_valid(
+    const file_descriptor& p_file_descriptor)
+{
+    return p_file_descriptor != -1;
+}
+
+//
+// Throws an standard exception with the specified string.
+//
+inline
+void
+throw_exception(
+    const std::string&& p_string)
+{
+    throw std::runtime_error(p_string.c_str());
+}
+
+//
+// Infinite repetition macro.
+//
+#define forever while (true)
 
 //
 // Status class for indicating errors across the system.
@@ -70,47 +103,47 @@ class status
 public:
 
     //
-    // Validates whether a given status is considered as failure.
+    // Determines whether a given status is considered as failure.
     //
     inline static
     bool
     failed(
         const status_code p_status_code)
     {
-        return p_status_code < 0;
+        return static_cast<int32>(p_status_code) < 0;
     }
 
     //
-    // Validates whether a given status is considered as success.
+    // Determines whether a given status is considered as success.
     //
     inline static
     bool
     succeeded(
-        const status_code p_status_code)
+        const status_code& p_status_code)
     {
         return p_status_code == success;
     }
 
     //
-    // Validates whether a given status is the same as another status.
+    // Determines whether a given status is the same as another status.
     //
     inline static
     bool
     is_same(
-        const status_code p_status_code_left,
-        const status_code p_status_code_right)
+        const status_code& p_status_code_left,
+        const status_code& p_status_code_right)
     {
         return p_status_code_left == p_status_code_right;
     }
 
     //
-    // Validates whether a given status is not the same as another status.
+    // Determines whether a given status is not the same as another status.
     //
     inline static
     bool
     is_not_same(
-        const status_code p_status_code_left,
-        const status_code p_status_code_right)
+        const status_code& p_status_code_left,
+        const status_code& p_status_code_right)
     {
         return p_status_code_left != p_status_code_right;
     }
@@ -124,6 +157,26 @@ public:
     // Generic operation failed.
     //
     static constexpr status_code fail = 0x8'0000000;
+
+    //
+    // Failure to start the inotify instance.
+    //
+    static constexpr status_code inotify_startup_failed = 0x8'0000001;
+
+    //
+    // Failure to create a watch descriptor for a directory.
+    //
+    static constexpr status_code directory_watch_descriptor_creation_failed = 0x8'0000002;
+
+    //
+    // Failure to launch a thread.
+    //
+    static constexpr status_code launch_thread_failed = 0x8'0000003;
+
+    //
+    // Specified directory does not exist.
+    //
+    static constexpr status_code directory_does_not_exist = 0x8'0000004;
 
 };
 

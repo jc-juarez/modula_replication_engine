@@ -37,12 +37,12 @@ public:
     //
     replication_task(
         replication_action p_replication_action,
-        const std::wstring& p_file_name);
+        const std::string& p_file_name);
 
     replication_action
     get_replication_action() const;
 
-    std::wstring
+    std::string
     get_file_name() const;
 
 private:
@@ -55,7 +55,7 @@ private:
     //
     // Name of the file tied to the task.
     //
-    std::wstring m_file_name;
+    std::string m_file_name;
     
 };
 

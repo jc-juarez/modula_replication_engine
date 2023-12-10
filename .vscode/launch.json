@@ -1,0 +1,18 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "g++ - Build and debug active file",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/home/jcjuarez/modula/src/build/modula",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "/home/jcjuarez/modula",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/gdb"
+        }
+    ]
+}

@@ -13,20 +13,26 @@ namespace modula
 {
 
 directory::directory(
-    const std::wstring& p_name)
+    const std::string& p_name,
+    const bool is_target_directory) :
+    m_name(p_name)
 {
-    if (!std::filesystem::exists(p_name))
+    if (is_target_directory &&
+        !std::filesystem::exists(p_name))
     {
         std::filesystem::create_directory(p_name);
     }
 }
 
-//
-// Checks if the directory is a subdirectory of another directory.
-//
+std::string
+directory::get_name() const
+{
+    return m_name;
+}
+
 bool
 directory::is_subdirectory_of(
-    const std::wstring& p_comparing_directory)
+    const std::string& p_comparing_directory)
 {
     //
     // Resolve symbolic links or other possible relative paths.

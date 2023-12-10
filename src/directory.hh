@@ -25,21 +25,28 @@ public:
     // Constructor. Initializes directory class.
     //
     directory(
-        const std::wstring& p_name);
+        const std::string& p_name,
+        const bool is_target_directory = false);
+
+    //
+    // Returns the directory name.
+    //
+    std::string
+    get_name() const;
 
     //
     // Checks if the directory is a subdirectory of another directory.
     //
     bool
     is_subdirectory_of(
-        const std::wstring& p_comparing_directory);
+        const std::string& p_comparing_directory);
 
 private:
 
     //
     // Name of the directory.
     //
-    std::wstring m_name;
+    std::string m_name;
     
 };
 
