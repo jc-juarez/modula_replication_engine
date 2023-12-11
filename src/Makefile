@@ -9,6 +9,7 @@ modula: main.o modula.o filesystem_monitor.o directory.o logger.o utilities.o th
 	-rm -r build
 	mkdir build
 	g++ -std=c++20 -g main.o modula.o filesystem_monitor.o directory.o logger.o utilities.o thread_pool.o replication_engine.o replication_manager.o -o ./build/modula -pthread
+	@echo "Modula build succeeded."
 	rm *.o
 
 main.o: ./main.cc

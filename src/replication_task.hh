@@ -8,6 +8,8 @@
 #ifndef REPLICATION_TASK_
 #define REPLICATION_TASK_
 
+#include "utilities.hh"
+
 #include <string>
 
 namespace modula
@@ -16,7 +18,7 @@ namespace modula
 //
 // Replication action enum class.
 //
-enum class replication_action
+enum class replication_action : uint8
 {
     create = 0,
     update = 1,

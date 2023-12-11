@@ -91,18 +91,18 @@ replication_manager::parse_initial_configuration_file_into_memory(
     const std::string& p_initial_configuration_file)
 {
     // Mock for now.
-    /*
-    directory source_directory("/home/jcjuarez/mock1");
+    
+    directory source_directory("/home/jcjuarez/mock10");
 
     std::vector<directory> target_directories {directory("/home/jcjuarez/mock2"), directory("/home/jcjuarez/mock3")};
 
     replication_engine replication_engine(
         std::move(source_directory),
-        std::move(target_directories));
+        std::move(target_directories),
+        m_replication_tasks_thread_pool);
 
     // Create move constuctor for replication engine as well.
-    m_replication_engines.emplace(replication_engine.get_name(), replication_engine);
-    */
+    m_replication_engines.emplace(replication_engine.get_name(), std::move(replication_engine));
 
     return status::success;
 }

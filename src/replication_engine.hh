@@ -33,9 +33,15 @@ public:
     // Constructor. Initializes the replication engine class.
     //
     replication_engine(
-        directory p_source_directory,
+        const directory&& p_source_directory,
         const std::vector<directory>&& m_target_directories,
-        const std::shared_ptr<thread_pool> p_replication_tasks_thread_pool);
+        std::shared_ptr<thread_pool> p_replication_tasks_thread_pool);
+
+    //
+    // Move constructor. Transfers instance ownership.
+    //
+    replication_engine(
+        replication_engine&& p_replication_engine);
 
     //
     // Directory-level full sync.
