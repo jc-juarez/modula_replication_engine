@@ -12,11 +12,9 @@ namespace modula
 
 replication_engine::replication_engine(
     const directory&& p_source_directory,
-    const std::vector<directory>&& p_target_directories,
-    std::shared_ptr<thread_pool> p_replication_tasks_thread_pool) :
+    const std::vector<directory>&& p_target_directories) :
     m_source_directory(std::move(p_source_directory)),
-    m_target_directories(std::move(p_target_directories)),
-    m_replication_tasks_thread_pool(p_replication_tasks_thread_pool)
+    m_target_directories(std::move(p_target_directories))
 {}
 
 replication_engine::replication_engine(
@@ -26,6 +24,13 @@ replication_engine::replication_engine(
     m_source_directory(std::move(p_replication_engine.m_source_directory)),
     m_target_directories(std::move(p_replication_engine.m_target_directories))
 {}
+
+void
+replication_engine::attach_replication_tasks_thread_pool(
+    std::shared_ptr<thread_pool> p_replication_tasks_thread_pool)
+{
+    m_replication_tasks_thread_pool = p_replication_tasks_thread_pool;
+}
 
 status_code
 replication_engine::execute_full_sync()

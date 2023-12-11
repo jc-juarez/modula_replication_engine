@@ -34,8 +34,7 @@ public:
     //
     replication_engine(
         const directory&& p_source_directory,
-        const std::vector<directory>&& m_target_directories,
-        std::shared_ptr<thread_pool> p_replication_tasks_thread_pool);
+        const std::vector<directory>&& m_target_directories);
 
     //
     // Move constructor. Transfers instance ownership.
@@ -44,7 +43,14 @@ public:
         replication_engine&& p_replication_engine);
 
     //
-    // Directory-level full sync.
+    // Attaches the initialized replication tasks thread pool.
+    //
+    void
+    attach_replication_tasks_thread_pool(
+        std::shared_ptr<thread_pool> p_replication_tasks_thread_pool);
+
+    //
+    // Performs a directory-level full sync.
     //
     status_code
     execute_full_sync();

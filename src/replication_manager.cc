@@ -27,9 +27,6 @@ replication_manager::replication_manager(
         return;
     }
 
-    m_replication_tasks_thread_pool = std::make_shared<thread_pool>(
-        c_replication_tasks_thread_pool_size);
-
     //
     // Initiate an initial full sync on all directories on startup.
     //
@@ -41,6 +38,21 @@ replication_manager::replication_manager(
             p_status));
 
         return;
+    }
+
+    //
+    // Attach the replication tasks thread pool after the replication
+    // engines have been correctly parsed and booted for the system.
+    //
+    m_replication_tasks_thread_pool = std::make_shared<thread_pool>(
+        c_replication_tasks_thread_pool_size);
+
+    for (std::pair<const std::string, replication_engine>& replication_engine_entry : m_replication_engines)
+    {
+        replication_engine& replication_engine = replication_engine_entry.second;
+
+        replication_engine.attach_replication_tasks_thread_pool(
+            m_replication_tasks_thread_pool);
     }
 }
 
@@ -69,8 +81,11 @@ replication_manager::execute_full_sync()
 {
     status_code status = status::success;
 
-    for (auto& [replication_engine_name, replication_engine] : m_replication_engines)
+    for (std::pair<const std::string, replication_engine>& replication_engine_entry : m_replication_engines)
     {
+        const std::string& replication_engine_name = replication_engine_entry.first;
+        replication_engine& replication_engine = replication_engine_entry.second;
+
         status = replication_engine.execute_full_sync();
 
         if (status::failed(status))
@@ -92,14 +107,13 @@ replication_manager::parse_initial_configuration_file_into_memory(
 {
     // Mock for now.
     
-    directory source_directory("/home/jcjuarez/mock10");
+    directory source_directory("/home/jcjuarez/mock1");
 
     std::vector<directory> target_directories {directory("/home/jcjuarez/mock2"), directory("/home/jcjuarez/mock3")};
 
     replication_engine replication_engine(
         std::move(source_directory),
-        std::move(target_directories),
-        m_replication_tasks_thread_pool);
+        std::move(target_directories));
 
     // Create move constuctor for replication engine as well.
     m_replication_engines.emplace(replication_engine.get_name(), std::move(replication_engine));

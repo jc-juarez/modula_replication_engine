@@ -38,8 +38,10 @@ filesystem_monitor::filesystem_monitor(
     //
     // Start all watch descriptors for the specified directories.
     //
-    for (const auto& [replication_engine_name, replication_engine] : m_replication_manager->get_replication_engines())
+    for (std::pair<const std::string, replication_engine>& replication_engine_entry : m_replication_manager->get_replication_engines())
     {
+        const std::string& replication_engine_name = replication_engine_entry.first;
+
         if (!std::filesystem::exists(replication_engine_name))
         {
             p_status = status::directory_does_not_exist;
