@@ -9,7 +9,6 @@ For building Modula Replication Engine from source in a GNU/Linux distribution, 
 After doing so, clone this repository and run the build script:
 
 ```shell
-chmod +x build.sh
-./build.sh
+chmod +x build.sh && ./build.sh
 ```
 The output `modula` file will be located under the `build` directory.
