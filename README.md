@@ -6,8 +6,12 @@ How to Build Modula from source
 ==========
 
 For building Modula Replication Engine from source in a GNU/Linux distribution, first ensure that you have a C++ compiler that supports C++20.
-After doing so, clone this repository and run the build script:
 
+After doing so, clone this repository:
+```shell
+git clone https://github.com/jc-juarez/modula_replication_engine/
+```
+And finally run the build script:
 ```shell
 chmod +x build.sh && ./build.sh
 ```
