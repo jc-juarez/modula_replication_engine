@@ -168,6 +168,7 @@ filesystem_monitor::replication_task_dispatcher()
                         break;
                 }
             }
+            
             number_bytes_processed += sizeof(struct inotify_event) + filesystem_event->len;
         }
     }
