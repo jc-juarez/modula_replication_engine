@@ -5,12 +5,13 @@
 // Author: jcjuarez
 // *************************************
 
-#include "filesystem_monitor.hh"
-
-#include <memory>
-
 #ifndef MODULA_
 #define MODULA_
+
+#include "filesystem_monitor.hh"
+#include "replication_manager.hh"
+
+#include <memory>
 
 namespace modula
 {
@@ -41,7 +42,7 @@ private:
     //
     //  Replication manager handle.
     //
-    // std::unique_ptr<replication_manager> m_replication_manager;
+    std::shared_ptr<replication_manager> m_replication_manager;
 
     //
     //  Filesystem monitor handle.

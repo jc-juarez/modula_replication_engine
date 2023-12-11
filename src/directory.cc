@@ -24,6 +24,16 @@ directory::directory(
     }
 }
 
+directory::directory(
+    const directory& p_directory) :
+    m_name(p_directory.m_name)
+{}
+
+directory::directory(
+    const directory&& p_directory) :
+    m_name(std::move(p_directory.m_name))
+{}
+
 std::string
 directory::get_name() const
 {

@@ -10,9 +10,12 @@
 
 #include "status.hh"
 #include "utilities.hh"
+#include "thread_pool.hh"
+#include "replication_manager.hh"
 
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace modula
 {
@@ -31,8 +34,7 @@ public:
     // Constructor. Initializes the filesystem monitor class.
     //
     filesystem_monitor(
-        // Reference to the replication manager
-        const std::vector<directory>& p_source_directories,
+        std::shared_ptr<replication_manager> p_replication_manager,
         status_code& p_status);
 
     //
@@ -55,9 +57,14 @@ public:
 private:
 
     //
+    // Thread pool for replication task dispatcher threads.
+    //
+    std::unique_ptr<thread_pool> m_dispatcher_thread_pool;
+
+    //
     // Replication manager handle.
     //
-    // replication_manager& m_replication_manager;
+    std::shared_ptr<replication_manager> m_replication_manager;
 
     //
     // File descriptor handle for the inotify instance.
@@ -73,6 +80,11 @@ private:
     // Max size for the read event buffer of the inotify instance.
     //
     static constexpr uint16 c_read_event_buffer_size = 8192u;
+
+    //
+    // Number of threads to be used by the dispatcher thread pool.
+    //
+    static constexpr uint16 c_dispatcher_thread_pool_size = 200u;
 
     //
     // Read event buffer of the inotify instance.

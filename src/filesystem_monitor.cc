@@ -19,28 +19,33 @@ namespace modula
 {
 
 filesystem_monitor::filesystem_monitor(
-    const std::vector<directory>& p_source_directories,
-    status_code& p_status)
+    std::shared_ptr<replication_manager> p_replication_manager,
+    status_code& p_status) :
+    m_replication_manager(p_replication_manager)
 {
     m_inotify_handle = inotify_init();
 
     if (!is_file_descriptor_valid(m_inotify_handle))
     {
         p_status = status::inotify_startup_failed;
+
+        logger::get_logger().log(log_level::critical, std::format("Inotify instance startup failed. Status={:#X}.",
+            p_status));
+
         return;
     }
 
     //
     // Start all watch descriptors for the specified directories.
     //
-    for (const directory& source_directory : p_source_directories)
+    for (const auto& [replication_engine_name, replication_engine] : m_replication_manager->get_replication_engines())
     {
-        if (!std::filesystem::exists(source_directory.get_name()))
+        if (!std::filesystem::exists(replication_engine_name))
         {
             p_status = status::directory_does_not_exist;
 
             logger::get_logger().log(log_level::critical, std::format("Directory '{}' does not exist. Status={:#X}.",
-                source_directory.get_name().c_str(),
+                replication_engine_name.c_str(),
                 p_status));
 
             return;
@@ -48,12 +53,17 @@ filesystem_monitor::filesystem_monitor(
 
         file_descriptor directory_watch_descriptor = inotify_add_watch(
             m_inotify_handle,
-            source_directory.get_name().c_str(),
+            replication_engine_name.c_str(),
             IN_CREATE | IN_MODIFY | IN_DELETE);
     
         if (!is_file_descriptor_valid(directory_watch_descriptor))
         {
             p_status = status::directory_watch_descriptor_creation_failed;
+
+            logger::get_logger().log(log_level::critical, std::format("Watch descriptor for directory '{}' could not be created. Status={:#X}.",
+                replication_engine_name.c_str(),
+                p_status));
+
             return;
         }
 
@@ -79,18 +89,27 @@ filesystem_monitor::start_replication_task_dispatcher()
     //
     // Launch the filesystem monitor thread to handle filesystem events.
     //
-    std::thread thread(
+    std::thread replication_task_dispatcher_thread(
         &filesystem_monitor::replication_task_dispatcher,
         this);
 
-    if (!thread.joinable())
+    if (!replication_task_dispatcher_thread.joinable())
     {
         status = status::launch_thread_failed;
-        // Log error.
+        
+        logger::get_logger().log(log_level::critical, std::format("Replication task dispatcher thread could not be started. Status={:#X}.",
+            status));
+
         return status;
     }
 
-    thread.detach();
+    replication_task_dispatcher_thread.detach();
+
+    //
+    // Initialize thread pool for handling dispatcher calls to replication engines.
+    //
+    m_dispatcher_thread_pool = std::make_unique<thread_pool>(
+        c_dispatcher_thread_pool_size);
 
     return status;
 }

@@ -22,11 +22,28 @@ class directory
 public:
 
     //
+    // Default constructor for container compatibility.
+    //
+    directory() = default;
+
+    //
     // Constructor. Initializes directory class.
     //
     directory(
         const std::string& p_name,
         const bool is_target_directory = false);
+
+    //
+    // Copy constructor.
+    //
+    directory(
+        const directory& p_directory);
+
+    //
+    // Move constructor. Transfers instance ownership.
+    // 
+    directory(
+        const directory&& p_directory);
 
     //
     // Returns the directory name.

@@ -29,15 +29,17 @@ modula::initialize_dependencies()
     // Parsing config file and bringing directories into memory.
     // Veifying rules: no multiple source directories, no multiple target directories and no subdirectories in target directories.
     // replication_manager = make(status) => inspect status
+    m_replication_manager = std::make_shared<replication_manager>(
+        "/home/jcjuarez/mockfile.txt",
+        status);
 
-    // Mock directories for now.
-    std::vector<directory> mock_directories;
-    mock_directories.emplace_back(directory("/home/jcjuarez/mock1"));
-    mock_directories.emplace_back(directory("/home/jcjuarez/mock2"));
-    mock_directories.emplace_back(directory("/home/jcjuarez/mock3"));
+    if (status::failed(status))
+    {
+        return status;
+    }
 
     m_filesystem_monitor = std::make_unique<filesystem_monitor>(
-        mock_directories,
+        m_replication_manager,
         status);
 
     if (status::failed(status))

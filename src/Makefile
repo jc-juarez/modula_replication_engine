@@ -1,14 +1,14 @@
 # *************************************
 # Modula Replication Engine
-# Utilities
+# Build
 # 'Makefile'
 # Author: jcjuarez
 # *************************************
 
-modula: main.o modula.o filesystem_monitor.o directory.o logger.o utilities.o thread_pool.o
+modula: main.o modula.o filesystem_monitor.o directory.o logger.o utilities.o thread_pool.o replication_engine.o replication_manager.o
 	-rm -r build
 	mkdir build
-	g++ -std=c++20 -g main.o modula.o filesystem_monitor.o directory.o logger.o utilities.o thread_pool.o -o ./build/modula -pthread
+	g++ -std=c++20 -g main.o modula.o filesystem_monitor.o directory.o logger.o utilities.o thread_pool.o replication_engine.o replication_manager.o -o ./build/modula -pthread
 	rm *.o
 
 main.o: ./main.cc
@@ -31,6 +31,12 @@ utilities.o: ./utilities.cc
 
 thread_pool.o: ./thread_pool.cc
 	g++ -std=c++20 -g -c ./thread_pool.cc -pthread
+
+replication_engine.o: ./replication_engine.cc
+	g++ -std=c++20 -g -c ./replication_engine.cc -pthread
+
+replication_manager.o: ./replication_manager.cc
+	g++ -std=c++20 -g -c ./replication_manager.cc -pthread
 
 clean:
 	-rm *.o
