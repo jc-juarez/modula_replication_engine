@@ -9,21 +9,11 @@
 #include "modula.hh"
 #include "utilities.hh"
 
-#include <unistd.h>
-
 int main(int argc, char** argv)
 {
     using namespace modula;
 
     status_code status = status::success;
-
-    if (getuid())
-    {
-        status = status::not_running_as_root;
-        
-        throw_exception(std::format("<!> Modula Replication Engine could not start without root user privileges. Status={:#X}.",
-            status));
-    }
 
     //
     // Initialize singleton logger through lazy initialization.

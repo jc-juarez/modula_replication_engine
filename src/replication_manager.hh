@@ -58,6 +58,8 @@ public:
     status_code
     execute_full_sync();
 
+private:
+
     //
     // Parses the initial configuration file into memory
     // and creates the replication engines for the system.
@@ -65,8 +67,6 @@ public:
     status_code
     parse_initial_configuration_file_into_memory(
         const std::string& p_configuration_file);
-
-private:
 
     //
     // Container for holding replication engines.
