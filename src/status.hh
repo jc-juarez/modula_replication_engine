@@ -105,6 +105,11 @@ public:
     //
     static constexpr status_code directory_does_not_exist = 0x8'0000004;
 
+    //
+    // Not running as root.
+    //
+    static constexpr status_code not_running_as_root = 0x8'0000005;
+
 };
 
 } // namespace modula.
