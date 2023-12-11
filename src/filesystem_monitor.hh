@@ -8,7 +8,8 @@
 #ifndef FILESYSTEM_MONITOR_
 #define FILESYSTEM_MONITOR_
 
-#include "constants.hh"
+#include "status.hh"
+#include "utilities.hh"
 
 #include <string>
 #include <vector>

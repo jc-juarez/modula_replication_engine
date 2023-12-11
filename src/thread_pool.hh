@@ -8,6 +8,8 @@
 #ifndef THREAD_POOL_
 #define THREAD_POOL_
 
+#include "utilities.hh"
+
 #include <queue>
 #include <mutex>
 #include <vector>
@@ -16,8 +18,6 @@
 #include <optional>
 #include <functional>
 #include <condition_variable>
-
-#include "constants.hh"
 
 namespace modula
 {

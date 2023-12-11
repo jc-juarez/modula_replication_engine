@@ -7,14 +7,20 @@
 
 #include "logger.hh"
 #include "modula.hh"
+#include "utilities.hh"
 
 #include <memory>
 
 int main(int argc, char** argv)
 {
+    using namespace modula;
+
     status_code status = status::success;
 
-    modula::logger::get_logger();
+    //
+    // Initialize singleton logger through lazy initialization.
+    //
+    logger::get_logger();
 
     std::unique_ptr<modula::modula> modula_replication_engine = std::make_unique<modula::modula>(
         status);

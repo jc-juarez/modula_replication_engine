@@ -110,8 +110,8 @@ filesystem_monitor::replication_task_dispatcher()
             continue;
         }
 
-        uint32 number_filesystem_events_processed {0};
-        uint32 number_bytes_processed {0};
+        uint32 number_filesystem_events_processed = 0;
+        uint32 number_bytes_processed = 0;
 
         while (number_bytes_processed < number_bytes_read)
         {

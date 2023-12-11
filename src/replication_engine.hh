@@ -8,7 +8,7 @@
 #ifndef REPLICATION_ENGINE_
 #define REPLICATION_ENGINE_
 
-#include "constants.hh"
+#include "status.hh"
 
 namespace modula
 {

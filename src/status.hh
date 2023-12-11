@@ -1,93 +1,20 @@
 // *************************************
 // Modula Replication Engine
 // Utilities
-// 'constants.hh'
+// 'status.hh'
 // Author: jcjuarez
 // *************************************
 
-#ifndef CONSTANTS_
-#define CONSTANTS_
+#ifndef STATUS_
+#define STATUS_
 
-#include <string>
-#include <stdexcept>
-
-//
-//  Unsigned 1 byte.
-//
-using byte = unsigned char;
-using uint8 = unsigned char;
-
-//
-//  Unsigned 2 bytes.
-//
-using uint16 = unsigned short;
-
-//
-//  Unsigned 4 bytes.
-//
-using uint32 = unsigned int;
-
-//
-//  Unsigned 8 bytes.
-//
-using uint64 = unsigned long long;
-
-//
-//  Signed 1 byte.
-//
-using int8 = char;
-
-//
-//  Signed 2 bytes.
-//
-using int16 = short;
-
-//
-//  Signed 4 bytes.
-//
-using int32 = int;
-
-//
-//  Signed 8 bytes.
-//
-using int64 = long long;
+namespace modula
+{
 
 //
 // Status code type alias.
 //
-using status_code = uint32;
-
-//
-// File descriptor alias.
-//
-using file_descriptor = int;
-
-//
-// Determines whether a file descriptor is valid.
-//
-inline
-bool
-is_file_descriptor_valid(
-    const file_descriptor& p_file_descriptor)
-{
-    return p_file_descriptor != -1;
-}
-
-//
-// Throws an standard exception with the specified string.
-//
-inline
-void
-throw_exception(
-    const std::string&& p_string)
-{
-    throw std::runtime_error(p_string.c_str());
-}
-
-//
-// Infinite repetition macro.
-//
-#define forever while (true)
+using status_code = unsigned int;
 
 //
 // Status class for indicating errors across the system.
@@ -110,7 +37,7 @@ public:
     failed(
         const status_code p_status_code)
     {
-        return static_cast<int32>(p_status_code) < 0;
+        return static_cast<int>(p_status_code) < 0;
     }
 
     //
@@ -179,5 +106,7 @@ public:
     static constexpr status_code directory_does_not_exist = 0x8'0000004;
 
 };
+
+} // namespace modula.
 
 #endif
