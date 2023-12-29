@@ -29,7 +29,7 @@ filesystem_monitor::filesystem_monitor(
     {
         p_status = status::inotify_startup_failed;
 
-        logger::get_logger().log(log_level::critical, std::format("Inotify instance startup failed. Status={:#X}.",
+        logger::log(log_level::critical, std::format("Inotify instance startup failed. Status={:#X}.",
             p_status));
 
         return;
@@ -46,7 +46,7 @@ filesystem_monitor::filesystem_monitor(
         {
             p_status = status::directory_does_not_exist;
 
-            logger::get_logger().log(log_level::critical, std::format("Directory '{}' does not exist. Status={:#X}.",
+            logger::log(log_level::critical, std::format("Directory '{}' does not exist. Status={:#X}.",
                 replication_engine_name.c_str(),
                 p_status));
 
@@ -62,7 +62,7 @@ filesystem_monitor::filesystem_monitor(
         {
             p_status = status::directory_watch_descriptor_creation_failed;
 
-            logger::get_logger().log(log_level::critical, std::format("Watch descriptor for directory '{}' could not be created. Status={:#X}.",
+            logger::log(log_level::critical, std::format("Watch descriptor for directory '{}' could not be created. Status={:#X}.",
                 replication_engine_name.c_str(),
                 p_status));
 
@@ -99,7 +99,7 @@ filesystem_monitor::start_replication_task_dispatcher()
     {
         status = status::launch_thread_failed;
         
-        logger::get_logger().log(log_level::critical, std::format("Replication task dispatcher thread could not be started. Status={:#X}.",
+        logger::log(log_level::critical, std::format("Replication task dispatcher thread could not be started. Status={:#X}.",
             status));
 
         return status;
@@ -146,25 +146,25 @@ filesystem_monitor::replication_task_dispatcher()
                 {
                     case IN_CREATE:
 
-                        logger::get_logger().log(log_level::info, std::format("File created: {}.",
+                        logger::log(log_level::info, std::format("File created: {}.",
                             filesystem_event_name));
                         break;
 
                     case IN_MODIFY:
 
-                        logger::get_logger().log(log_level::info, std::format("File modified: {}.",
+                        logger::log(log_level::info, std::format("File modified: {}.",
                             filesystem_event_name));
                         break;
 
                     case IN_DELETE:
 
-                        logger::get_logger().log(log_level::info, std::format("File deleted: {}.",
+                        logger::log(log_level::info, std::format("File deleted: {}.",
                             filesystem_event_name));
                         break;
 
                     default:
 
-                        logger::get_logger().log(log_level::warning, "Unkwown event type.");
+                        logger::log(log_level::warning, "Unkwown event type.");
                         break;
                 }
             }

@@ -20,7 +20,7 @@ replication_manager::replication_manager(
 
     if (status::failed(p_status))
     {
-        logger::get_logger().log(log_level::critical, std::format("Initial configuration file '{}' parsing failed. Status={:#X}.",
+        logger::log(log_level::critical, std::format("Initial configuration file '{}' parsing failed. Status={:#X}.",
             p_initial_configuration_file.c_str(),
             p_status));
 
@@ -34,7 +34,7 @@ replication_manager::replication_manager(
 
     if (status::failed(p_status))
     {
-        logger::get_logger().log(log_level::critical, std::format("Initial full sync on startup failed. Status={:#X}.",
+        logger::log(log_level::critical, std::format("Initial full sync on startup failed. Status={:#X}.",
             p_status));
 
         return;
@@ -90,7 +90,7 @@ replication_manager::execute_full_sync()
 
         if (status::failed(status))
         {
-            logger::get_logger().log(log_level::error, std::format("Full sync for directory '{}' failed. Status={:#X}.",
+            logger::log(log_level::error, std::format("Full sync for directory '{}' failed. Status={:#X}.",
                 replication_engine_name,
                 status));
 

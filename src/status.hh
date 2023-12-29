@@ -105,6 +105,11 @@ public:
     //
     static constexpr status_code directory_does_not_exist = 0x8'0000004;
 
+    //
+    // Logger is not yet initialized.
+    //
+    static constexpr status_code logger_not_initialized = 0x8'0000005;
+
 };
 
 } // namespace modula.

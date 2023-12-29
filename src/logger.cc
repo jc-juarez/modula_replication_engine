@@ -12,17 +12,20 @@
 namespace modula
 {
 
-//
-// Constructor for the singleton instance. Initializes logger configuration.
-//
-logger::logger(
-    /* logger options struct -> will hold the status of initialization. */)
-{
+bool logger::s_initialized = false;
 
+logger::logger(
+    const logger_initialization_data* p_logger_initialization_data)
+{
+    if (p_logger_initialization_data != nullptr)
+    {
+        m_debug_mode_enabled = p_logger_initialization_data->m_debug_mode_enabled;
+        m_logs_directory = p_logger_initialization_data->m_logs_directory;
+    }
 }
 
 void
-logger::log(
+logger::log_internal(
     const log_level& p_log_level,
     const std::string&& p_string)
 {
@@ -31,13 +34,34 @@ logger::log(
     std::cout << p_string.c_str() << std::endl;
 }
 
-logger&
-logger::get_logger(
-    /* optional logger options struct -> will hold the status of initialization. */)
+void
+logger::initialize(
+    const logger_initialization_data* p_logger_initialization_data)
 {
-    static logger logger_singleton;
+    s_initialized = true;
 
-    return logger_singleton;
+    log(log_level::info,
+        "Modula Replication Engine logger has been initialized.",
+        p_logger_initialization_data);
+}
+
+void
+logger::log(
+    const log_level& p_log_level,
+    const std::string&& p_string,
+    const logger_initialization_data* p_logger_initialization_data)
+{
+    if (!s_initialized)
+    {
+        throw_exception(std::format("<!> Modula Replication Engine logger has not been yet initialized. Status={:#X}.",
+            status::logger_not_initialized));
+    }
+
+    static logger logger_singleton(p_logger_initialization_data);
+
+    logger_singleton.log_internal(
+        p_log_level,
+        std::move(p_string));
 }
 
 } // namespace modula.

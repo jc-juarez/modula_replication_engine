@@ -16,9 +16,9 @@ int main(int argc, char** argv)
     status_code status = status::success;
 
     //
-    // Initialize singleton logger through lazy initialization.
+    // Initialize singleton logger for the system.
     //
-    logger::get_logger();
+    logger::initialize(nullptr);
 
     std::unique_ptr<modula::modula> modula_replication_engine = std::make_unique<modula::modula>(
         status);

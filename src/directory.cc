@@ -1,6 +1,6 @@
 // *************************************
 // Modula Replication Engine
-// Utilities
+// Core
 // 'directory.cc'
 // Author: jcjuarez
 // *************************************
