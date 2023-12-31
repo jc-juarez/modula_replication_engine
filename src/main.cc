@@ -15,6 +15,12 @@ int main(int argc, char** argv)
 
     status_code status = status::success;
 
+    // Command-line arguments for system startup override
+    // debug={Debug mode enabled: on} logs={Logs files enabled: on}  directory={Logs files directory: var/log/modula}
+    std::vector<std::string> args(argv, argv + argc);
+    
+    // system_configuration modula_system_configuration(args);
+
     //
     // Initialize singleton logger for the system.
     //

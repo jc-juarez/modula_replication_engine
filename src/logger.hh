@@ -17,19 +17,6 @@
 namespace modula
 {
 
-struct logger_initialization_data
-{
-    //
-    // Flag for determining whether debug mode is enabled for the logger instance.
-    //
-    bool m_debug_mode_enabled;
-
-    //
-    // Path for storing the logger files.
-    //
-    std::string m_logs_directory;
-};
-
 enum class log_level : uint8
 {
     info = 0,
@@ -37,6 +24,8 @@ enum class log_level : uint8
     error = 2,
     critical = 3
 };
+
+struct logger_configuration;
 
 //
 // Logger singleton class for managing logging in the system.
@@ -50,13 +39,13 @@ private:
     // Default constructor for the singleton instance.
     //
     logger(
-        const logger_initialization_data* p_logger_initialization_data);
+        const logger_configuration* p_logger_configuration);
 
     //
     // Logging internal method.
     //
     void
-    log_internal(
+    log_message(
         const log_level& p_log_level,
         const std::string&& p_string);
 
@@ -68,7 +57,7 @@ public:
     static
     void
     initialize(
-        const logger_initialization_data* p_logger_initialization_data);
+        const logger_configuration* p_logger_configuration);
 
     //
     // Logging external method.
@@ -78,7 +67,7 @@ public:
     log(
         const log_level& p_log_level,
         const std::string&& p_string,
-        const logger_initialization_data* p_logger_initialization_data = nullptr);
+        const logger_configuration* p_logger_configuration = nullptr);
 
 private:
 
@@ -98,7 +87,7 @@ private:
     bool m_debug_mode_enabled;
 
     //
-    // Path where system logs will be stored.
+    // Path to the directory where system logs will be stored.
     //
     std::string m_logs_directory;
     

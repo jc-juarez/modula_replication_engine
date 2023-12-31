@@ -6,6 +6,7 @@
 // *************************************
 
 #include "logger.hh"
+#include "system_configuration.hh"
 
 #include <iostream>
 
@@ -15,17 +16,17 @@ namespace modula
 bool logger::s_initialized = false;
 
 logger::logger(
-    const logger_initialization_data* p_logger_initialization_data)
+    const logger_configuration* p_logger_configuration)
 {
-    if (p_logger_initialization_data != nullptr)
+    if (p_logger_configuration != nullptr)
     {
-        m_debug_mode_enabled = p_logger_initialization_data->m_debug_mode_enabled;
-        m_logs_directory = p_logger_initialization_data->m_logs_directory;
+        m_debug_mode_enabled = p_logger_configuration->m_debug_mode_enabled;
+        m_logs_directory = p_logger_configuration->m_logs_directory;
     }
 }
 
 void
-logger::log_internal(
+logger::log_message(
     const log_level& p_log_level,
     const std::string&& p_string)
 {
@@ -36,20 +37,20 @@ logger::log_internal(
 
 void
 logger::initialize(
-    const logger_initialization_data* p_logger_initialization_data)
+    const logger_configuration* p_logger_configuration)
 {
     s_initialized = true;
 
     log(log_level::info,
         "Modula Replication Engine logger has been initialized.",
-        p_logger_initialization_data);
+        p_logger_configuration);
 }
 
 void
 logger::log(
     const log_level& p_log_level,
     const std::string&& p_string,
-    const logger_initialization_data* p_logger_initialization_data)
+    const logger_configuration* p_logger_configuration)
 {
     if (!s_initialized)
     {
@@ -57,9 +58,10 @@ logger::log(
             status::logger_not_initialized));
     }
 
-    static logger logger_singleton(p_logger_initialization_data);
+    static logger logger_singleton_instance(
+        p_logger_configuration);
 
-    logger_singleton.log_internal(
+    logger_singleton_instance.log_message(
         p_log_level,
         std::move(p_string));
 }
