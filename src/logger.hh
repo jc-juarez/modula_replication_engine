@@ -142,6 +142,16 @@ private:
     // Path to the directory where system logs will be stored.
     //
     std::string m_logs_directory_path;
+
+    //
+    // Logger session ID.
+    //
+    // std::string m_session_id;
+
+    //
+    // Logs files count.  
+    //
+    // uint64 m_logs_files_count;
     
 };
 

@@ -31,6 +31,9 @@ logger::logger(
 
     m_debug_mode_enabled = p_logger_configuration->m_debug_mode_enabled;
     m_logs_directory_path = p_logger_configuration->m_logs_directory_path;
+
+    // Create m_logs_directory_path if it does not exist,
+    // and create a subdirectory with a logger-session-id. This must be a member of the logger.
 }
 
 void
@@ -82,8 +85,15 @@ logger::log_message(
 
         if (m_debug_mode_enabled)
         {
+            // Create a wrapper function around this.
             std::cout << p_message.c_str() << std::endl;
         }
+
+        // Create a function to append the current log to a file.
+        // This function should first check if the session-id subdirectory is empty; if so, it must create a new file. (Files are: log_{session-id}_{logs_file_count}.log)
+        // If not empty, it must be able to grab the last file (can be identified by the logs_file_count in its name, if fails then create a new file). Be sure to never overwrite existing files.
+        // This must be able to determine the size in MiB of the previous file: if it exceeds a threshold it needs a new file, if not write to that prev file.
+        // append_log_to_file(std::move(formatted_log_message));
     }
 }
 
@@ -124,6 +134,7 @@ logger::create_formatted_log_message(
 
     std::string formatted_log_message;
 
+    // Also log the m_session_id.
     formatted_log_message.append(
         "[" + timestamp::get_current_time().to_string() + "] <" + level + "> " + p_message);
 
