@@ -110,6 +110,11 @@ public:
     //
     static constexpr status_code logger_not_initialized = 0x8'0000005;
 
+    //
+    // Incorrect parameters.
+    //
+    static constexpr status_code incorrect_parameters = 0x8'0000006;
+
 };
 
 } // namespace modula.

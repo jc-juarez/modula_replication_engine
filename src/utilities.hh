@@ -9,50 +9,67 @@
 #define UTILITIES_
 
 #include <string>
+#include <chrono>
 
 namespace modula
 {
 
 //
-//  Unsigned 1 byte.
+// Infinite repetition macro.
+//
+#define forever while (true)
+
+//
+// Unsigned 1 byte.
 //
 using byte = unsigned char;
 using uint8 = unsigned char;
 
 //
-//  Unsigned 2 bytes.
+// Unsigned 2 bytes.
 //
 using uint16 = unsigned short;
 
 //
-//  Unsigned 4 bytes.
+// Unsigned 4 bytes.
 //
 using uint32 = unsigned int;
 
 //
-//  Unsigned 8 bytes.
+// Unsigned 8 bytes.
 //
 using uint64 = unsigned long long;
 
 //
-//  Signed 1 byte.
+// Signed 1 byte.
 //
 using int8 = char;
+using character = char;
 
 //
-//  Signed 2 bytes.
+// Signed 2 bytes.
 //
 using int16 = short;
 
 //
-//  Signed 4 bytes.
+// Signed 4 bytes.
 //
 using int32 = int;
 
 //
-//  Signed 8 bytes.
+// Signed 8 bytes.
 //
 using int64 = long long;
+
+//
+// Single-precision 4 bytes floating point.
+//
+using single_precision = float;
+
+//
+// Double-precision 8 bytes floating point.
+//
+using double_precision = double;
 
 //
 // File descriptor alias.
@@ -72,11 +89,6 @@ is_file_descriptor_valid(
 void
 throw_exception(
     const std::string&& p_string);
-
-//
-// Infinite repetition macro.
-//
-#define forever while (true)
 
 } // namespace modula.
 

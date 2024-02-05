@@ -136,7 +136,7 @@ filesystem_monitor::replication_task_dispatcher()
 
         while (number_bytes_processed < number_bytes_read)
         {
-            struct inotify_event* filesystem_event = reinterpret_cast<struct inotify_event*>(&m_read_event_buffer[number_bytes_processed]);
+            struct inotify_event* filesystem_event = reinterpret_cast<inotify_event*>(&m_read_event_buffer[number_bytes_processed]);
 
             if (filesystem_event->len)
             {

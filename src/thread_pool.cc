@@ -53,12 +53,13 @@ thread_pool::get_number_threads() const
 void
 thread_pool::task_handler()
 {
-    while (true)
+    forever
     {
         std::function<void()> task;
 
         {
             std::unique_lock<std::mutex> lock(m_lock);
+
             m_condition.wait(lock,
                 [this]
                 {
@@ -66,6 +67,10 @@ thread_pool::task_handler()
                         !this->m_tasks.empty();
                 });
 
+            //
+            // If the destructor has been invoked, wait for finishing
+            // all pending tasks and then terminate the invoked thread.
+            //
             if (this->m_stop &&
                 this->m_tasks.empty())
             {
