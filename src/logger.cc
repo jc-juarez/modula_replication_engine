@@ -9,7 +9,11 @@
 #include "timestamp.hh"
 #include "system_configuration.hh"
 
+#include <ctime>
+#include <limits>
+#include <sstream>
 #include <iostream>
+#include <filesystem>
 
 namespace modula
 {
@@ -18,6 +22,7 @@ bool logger::s_initialized = false;
 
 logger::logger(
     const logger_configuration* p_logger_configuration)
+    : m_random_number_distribution(0, std::numeric_limits<uint64>::max())
 {
     //
     // The logger is agnostic to the default configurations given by the
@@ -25,15 +30,54 @@ logger::logger(
     //
     if (p_logger_configuration == nullptr)
     {
-        throw_exception(std::format("<!> Modula Replication Engine logger has received incorrect initialization configuration parameters. Status={:#X}.",
+        throw_exception(std::format("<!> Modula replication engine logger has received incorrect initialization configuration parameters. Status={:#X}.",
             status::incorrect_parameters));
     }
 
     m_debug_mode_enabled = p_logger_configuration->m_debug_mode_enabled;
     m_logs_directory_path = p_logger_configuration->m_logs_directory_path;
 
-    // Create m_logs_directory_path if it does not exist,
-    // and create a subdirectory with a logger-session-id. This must be a member of the logger.
+    //
+    // Initialize the random number generator.
+    //
+    try
+    {
+        m_random_number_generator.seed(std::random_device{}());
+    }
+    catch (const std::exception& exception)
+    {
+        m_random_number_generator.seed(static_cast<uint32>(std::time(nullptr)));
+    }
+
+    //
+    // Set the session ID after the random number generator has been
+    // initialized and ensure that the session ID does not already exist.
+    //
+    std::string session_id;
+    std::filesystem::path session_logs_directory_path;
+
+    do
+    {
+        session_id = generate_unique_identifier();
+        session_logs_directory_path = m_logs_directory_path;
+        session_logs_directory_path.append(c_session_logs_directory_prefix + session_id);
+    }
+    while (std::filesystem::exists(session_logs_directory_path));
+
+    m_session_id = session_id;
+
+    std::string exception;
+    status_code status = create_directory(
+        session_logs_directory_path.string(),
+        &exception);
+
+    if (status::failed(status))
+    {
+        throw_exception(std::format("<!> Modula replication engine logger failed to create session logs directory '{}'. Exception: '{}', Status={:#X}.",
+            session_logs_directory_path.string().c_str(),
+            exception.c_str(),
+            status));
+    }
 }
 
 void
@@ -55,7 +99,7 @@ logger::log(
 {
     if (!s_initialized)
     {
-        throw_exception(std::format("<!> Modula Replication Engine logger has not been yet initialized. Status={:#X}.",
+        throw_exception(std::format("<!> Modula replication engine logger has not been yet initialized. Status={:#X}.",
             status::logger_not_initialized));
     }
 
@@ -98,6 +142,25 @@ logger::log_message(
 }
 
 std::string
+logger::generate_unique_identifier()
+{
+    std::stringstream unique_identifier_stream;
+
+    unique_identifier_stream
+        << std::to_string(generate_random_number())
+        << "-"
+        << std::to_string(generate_random_number());
+
+    return unique_identifier_stream.str();
+}
+
+uint64
+logger::generate_random_number()
+{
+    return m_random_number_distribution(m_random_number_generator);
+}
+
+std::string
 logger::create_formatted_log_message(
     const log_level& p_log_level,
     const std::string&& p_message)
@@ -132,13 +195,18 @@ logger::create_formatted_log_message(
             break;
     }
 
-    std::string formatted_log_message;
+    std::stringstream formatted_log_message;
 
     // Also log the m_session_id.
-    formatted_log_message.append(
-        "[" + timestamp::get_current_time().to_string() + "] <" + level + "> " + p_message);
+    formatted_log_message
+        << "["
+        << timestamp::get_current_time().to_string()
+        << "] <"
+        << level
+        << "> "
+        << p_message;
 
-    return formatted_log_message;
+    return formatted_log_message.str();
 }
 
 } // namespace modula.

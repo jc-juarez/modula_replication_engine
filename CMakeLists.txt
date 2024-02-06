@@ -23,6 +23,8 @@ set(SOURCE_FILES
     src/utilities.cc
     src/thread_pool.cc
     src/replication_engine.cc
-    src/replication_manager.cc)
+    src/replication_manager.cc
+    src/system_configuration.cc
+    src/timestamp.cc)
 
 add_executable(modula ${SOURCE_FILES})

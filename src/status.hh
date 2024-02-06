@@ -115,6 +115,16 @@ public:
     //
     static constexpr status_code incorrect_parameters = 0x8'0000006;
 
+    //
+    // Failure to create a directory.
+    //
+    static constexpr status_code directory_creation_failed = 0x8'0000007;
+
+    //
+    // Failure to retrieve an environment variable.
+    //
+    static constexpr status_code environment_variable_access_failed = 0x8'0000008;
+
 };
 
 } // namespace modula.

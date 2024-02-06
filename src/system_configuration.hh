@@ -9,6 +9,7 @@
 #define SYSTEM_CONFIGURATION_
 
 #include "status.hh"
+#include "utilities.hh"
 
 #include <string>
 #include <vector>
@@ -43,9 +44,9 @@ struct logger_configuration
     static constexpr bool c_default_debug_mode_enabled = true;
 
     //
-    // Default logs directory path.
+    // Default logs directory name.
     //
-    static constexpr character* c_default_logs_directory_path = "/var/log/modula";
+    static constexpr character* c_default_logs_directory_name = "modula-logs";
     
 };
 
@@ -68,8 +69,6 @@ public:
     status_code
     parse_command_line_arguments(
         const std::vector<std::string>& p_command_line_arguments);
-
-private:
 
     //
     // Container for the logger configuration.

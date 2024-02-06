@@ -9,6 +9,7 @@
 #include "utilities.hh"
 
 #include <mutex>
+#include <random>
 #include <format> // Added in header file for global access by including it.
 
 #ifndef LOGGER_
@@ -91,10 +92,22 @@ private:
         const std::string&& p_message);
 
     //
+    // Generates a random <8 bytes>-<8 bytes> unique identifier. 
+    //
+    std::string
+    generate_unique_identifier();
+
+    //
+    // Generates a random 8 bytes number.
+    //
+    uint64
+    generate_random_number();
+
+    //
     // Constructs the log message with formatting.
     //
     std::string
-    create_formatted_log_message(
+    static create_formatted_log_message(
         const log_level& p_log_level,
         const std::string&& p_message);
 
@@ -129,9 +142,29 @@ private:
     static constexpr character* c_default_log_level = "Unknown";
 
     //
+    // Session logs directory prefix.
+    //
+    static constexpr character* c_session_logs_directory_prefix = "modula-logs-";
+
+    //
+    // Logs files extension.
+    //
+    static constexpr character* c_logs_files_extension = ".log";
+
+    //
     // Lock for synchronizing access across threads.
     //
     std::mutex m_lock;
+
+    //
+    // Random number generator for unique identifiers.
+    //
+    std::mt19937 m_random_number_generator;
+
+    //
+    // Distribution for random numbers generation.
+    //
+    std::uniform_int_distribution<uint64> m_random_number_distribution;
 
     //
     // Flag for determining whether debug mode is enabled.
@@ -146,7 +179,7 @@ private:
     //
     // Logger session ID.
     //
-    // std::string m_session_id;
+    std::string m_session_id;
 
     //
     // Logs files count.  

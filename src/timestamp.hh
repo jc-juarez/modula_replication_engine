@@ -60,7 +60,7 @@ private:
     //
     // Timestamp format.
     //
-    static constexpr character* c_timestamp_format = "%Y-%m-%d %H:%M:%S";
+    static constexpr character* c_timestamp_format = "%Y-%m-%dT%H:%M:%SZ";
     
 };
 

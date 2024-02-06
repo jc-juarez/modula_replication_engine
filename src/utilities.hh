@@ -8,6 +8,8 @@
 #ifndef UTILITIES_
 #define UTILITIES_
 
+#include "status.hh"
+
 #include <string>
 #include <chrono>
 
@@ -84,11 +86,16 @@ is_file_descriptor_valid(
     const file_descriptor& p_file_descriptor);
 
 //
-// Throws an standard exception with the specified string.
+// Throws an standard exception with the specified message.
 //
 void
 throw_exception(
-    const std::string&& p_string);
+    const std::string&& p_message);
+
+status_code
+create_directory(
+    const std::string& p_directory_name,
+    std::string* p_exception = nullptr);
 
 } // namespace modula.
 
