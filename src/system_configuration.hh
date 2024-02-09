@@ -29,13 +29,6 @@ struct logger_configuration
     logger_configuration();
 
     //
-    // Sets the logs directory path in runtime.
-    //
-    status_code
-    set_logs_directory_path(
-        const std::string& p_logs_directory_path);
-
-    //
     // Flag for determining whether debug mode is enabled for the logger instance.
     //
     bool m_debug_mode_enabled;
@@ -45,25 +38,10 @@ struct logger_configuration
     //
     std::string m_logs_directory_path;
 
-    //
-    // Default debug mode enabled option.
-    //
-    static constexpr bool c_default_debug_mode_enabled = true;
-
-    //
-    // Default logs directory name.
-    //
-    static constexpr character* c_default_logs_directory_name = "modula-logs";
-
-    //
-    // Default environment variable used for default logs directory path resolution.
-    //
-    static constexpr character* c_default_logs_directory_environment_variable = "HOME";
-
 };
 
 //
-// System configuration container class for storing system-wide preferences.
+// System configuration class for storing and managing system-wide preferences.
 //
 class system_configuration
 {
@@ -82,7 +60,19 @@ public:
     //
     logger_configuration m_logger_configuration;
 
+    //
+    // Default debug mode enabled option.
+    //
+    static constexpr bool c_default_debug_mode_enabled = true;
+
 private:
+
+    //
+    // Sets the logs directory path for the logger in runtime.
+    //
+    status_code
+    set_logs_directory_path(
+        const std::string& p_logs_directory_path);
 
     //
     // Parses an on/off value into a boolean.
@@ -99,6 +89,16 @@ private:
     parse_command_line_arguments(
         const std::vector<std::string>& p_command_line_arguments,
         std::string* p_logs_directory_path);
+
+    //
+    // Default logs directory name.
+    //
+    static constexpr character* c_default_logs_directory_name = "modula-logs";
+
+    //
+    // Default environment variable used for default logs directory path resolution.
+    //
+    static constexpr character* c_default_logs_directory_environment_variable = "HOME";
 
     //
     // Sudo text representation for ignoring possible appearance in command line execution.

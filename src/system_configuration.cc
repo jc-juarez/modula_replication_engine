@@ -14,17 +14,17 @@ namespace modula
 {
 
 logger_configuration::logger_configuration()
-    : m_debug_mode_enabled(c_default_debug_mode_enabled),
-     m_logs_directory_path("")
+    : m_debug_mode_enabled(system_configuration::c_default_debug_mode_enabled),
+      m_logs_directory_path("")
 {}
 
 status_code
-logger_configuration::set_logs_directory_path(
+system_configuration::set_logs_directory_path(
     const std::string& p_logs_directory_path)
 {
     if (!p_logs_directory_path.empty())
     {
-        m_logs_directory_path = p_logs_directory_path;
+        m_logger_configuration.m_logs_directory_path = p_logs_directory_path;
 
         return status::success;
     }
@@ -36,7 +36,7 @@ logger_configuration::set_logs_directory_path(
         return status::environment_variable_access_failed;
     }
 
-    m_logs_directory_path = std::string(home_environment_variable) + "/" + std::string(c_default_logs_directory_name);
+    m_logger_configuration.m_logs_directory_path = std::string(home_environment_variable) + "/" + std::string(c_default_logs_directory_name);
 
     return status::success;
 }
@@ -59,7 +59,7 @@ system_configuration::system_configuration(
     //
     // Initialize runtime defined configurations.
     //
-    m_logger_configuration.set_logs_directory_path(logs_directory_path);
+    set_logs_directory_path(logs_directory_path);
 }
 
 status_code

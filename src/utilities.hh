@@ -102,6 +102,9 @@ void
 throw_exception(
     const std::string&& p_message);
 
+//
+// Creates the specified directory recursively.
+//
 status_code
 create_directory(
     const std::string& p_directory_name,
