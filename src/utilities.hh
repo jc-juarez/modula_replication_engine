@@ -22,6 +22,16 @@ namespace modula
 #define forever while (true)
 
 //
+// Return if failed macro.
+//
+#define return_if_failed(p_status) if (status::failed(p_status)) { return; }
+
+//
+// Return status if failed macro.
+//
+#define return_status_if_failed(p_status) if (status::failed(p_status)) { return p_status; }
+
+//
 // Unsigned 1 byte.
 //
 using byte = unsigned char;

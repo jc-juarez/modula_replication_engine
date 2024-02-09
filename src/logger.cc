@@ -87,7 +87,7 @@ logger::initialize(
     s_initialized = true;
 
     log(log_level::info,
-        "Modula Replication Engine logger has been initialized.",
+        "Modula replication engine logger has been initialized.",
         p_logger_configuration);
 }
 
@@ -130,7 +130,7 @@ logger::log_message(
         if (m_debug_mode_enabled)
         {
             // Create a wrapper function around this.
-            std::cout << p_message.c_str() << std::endl;
+            std::cout << formatted_log_message.c_str() << std::endl;
         }
 
         // Create a function to append the current log to a file.
@@ -170,29 +170,35 @@ logger::create_formatted_log_message(
     switch (static_cast<uint8>(p_log_level))
     {
         case static_cast<uint8>(log_level::info):
-
+        {
             level = c_info_log_level;
-            break;
 
+            break;
+        }
         case static_cast<uint8>(log_level::warning):
-
+        {
             level = c_warning_log_level;
-            break;
 
+            break;
+        }
         case static_cast<uint8>(log_level::error):
-
+        {
             level = c_error_log_level;
-            break;
 
+            break;
+        }
         case static_cast<uint8>(log_level::critical):
-
+        {
             level = c_critical_log_level;
-            break;
 
+            break;
+        }
         default:
-
+        {
             level = c_default_log_level;
+
             break;
+        }
     }
 
     std::stringstream formatted_log_message;

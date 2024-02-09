@@ -125,6 +125,16 @@ public:
     //
     static constexpr status_code environment_variable_access_failed = 0x8'0000008;
 
+    //
+    // Malformed commmand line arguments provided.
+    //
+    static constexpr status_code malformed_command_line_arguments = 0x8'0000009;
+
+    //
+    // Provided configuration flag does not exist.
+    //
+    static constexpr status_code configuration_flag_not_recognized = 0x8'0000010;
+
 };
 
 } // namespace modula.

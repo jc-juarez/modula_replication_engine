@@ -29,7 +29,7 @@ public:
     //
     modula(
         // system options
-        status_code& p_status);
+        status_code* p_status);
 
     //
     // Initializes all system dependencies.

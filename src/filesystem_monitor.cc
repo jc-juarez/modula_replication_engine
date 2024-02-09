@@ -145,27 +145,32 @@ filesystem_monitor::replication_task_dispatcher()
                 switch (filesystem_event->mask)
                 {
                     case IN_CREATE:
-
-                        logger::log(log_level::info, std::format("File created: {}.",
+                    {
+                        logger::log(log_level::info, std::format("File created: '{}'.",
                             filesystem_event_name));
-                        break;
 
+                        break;
+                    }
                     case IN_MODIFY:
-
-                        logger::log(log_level::info, std::format("File modified: {}.",
+                    {
+                        logger::log(log_level::info, std::format("File modified: '{}'.",
                             filesystem_event_name));
-                        break;
 
+                        break;
+                    }
                     case IN_DELETE:
-
-                        logger::log(log_level::info, std::format("File deleted: {}.",
+                    {
+                        logger::log(log_level::info, std::format("File deleted: '{}'.",
                             filesystem_event_name));
-                        break;
 
+                        break;
+                    }
                     default:
-
+                    {
                         logger::log(log_level::warning, "Unkwown event type.");
+
                         break;
+                    }
                 }
             }
             

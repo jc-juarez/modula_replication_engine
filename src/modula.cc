@@ -12,9 +12,9 @@ namespace modula
 {
 
 modula::modula(
-    status_code& p_status)
+    status_code* p_status)
 {
-    p_status = initialize_dependencies();
+    *p_status = initialize_dependencies();
 }
 
 //
@@ -33,19 +33,13 @@ modula::initialize_dependencies()
         "/home/jcjuarez/mockfile.txt",
         status);
 
-    if (status::failed(status))
-    {
-        return status;
-    }
+    return_status_if_failed(status)
 
     m_filesystem_monitor = std::make_unique<filesystem_monitor>(
         m_replication_manager,
         status);
 
-    if (status::failed(status))
-    {
-        return status;
-    }
+    return_status_if_failed(status)
 
     m_filesystem_monitor->start_replication_task_dispatcher();
 
