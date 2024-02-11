@@ -135,6 +135,11 @@ public:
     //
     static constexpr status_code configuration_flag_not_recognized = 0x8'0000010;
 
+    //
+    // Logger is already initialized.
+    //
+    static constexpr status_code logger_already_initialized = 0x8'0000011;
+
 };
 
 } // namespace modula.

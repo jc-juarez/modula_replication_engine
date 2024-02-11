@@ -75,14 +75,6 @@ private:
         const std::string& p_logs_directory_path);
 
     //
-    // Parses an on/off value into a boolean.
-    //
-    status_code
-    parse_on_off_to_bool(
-        const std::string& p_value,
-        bool* p_bool);
-
-    //
     // Parses the command line arguments for filling the system configuration class.
     //
     status_code
@@ -91,49 +83,58 @@ private:
         std::string* p_logs_directory_path);
 
     //
+    // Parses an on/off value into a boolean.
+    //
+    static
+    status_code
+    parse_on_off_to_bool(
+        const std::string& p_value,
+        bool* p_bool);
+
+    //
     // Default logs directory name.
     //
-    static constexpr character* c_default_logs_directory_name = "modula-logs";
+    static constexpr const character* c_default_logs_directory_name = "modula-logs";
 
     //
     // Default environment variable used for default logs directory path resolution.
     //
-    static constexpr character* c_default_logs_directory_environment_variable = "HOME";
+    static constexpr const character* c_default_logs_directory_environment_variable = "HOME";
 
     //
     // Sudo text representation for ignoring possible appearance in command line execution.
     //
-    static constexpr character* c_sudo = "sudo";
+    static constexpr const character* c_sudo = "sudo";
 
     //
     // Flag indicator symbol.
     //
-    static constexpr character c_flag_indicator = '-';
+    static constexpr const character c_flag_indicator = '-';
 
     //
     // Flag assignment symbol.
     //
-    static constexpr character c_flag_assignment = '=';
+    static constexpr const character c_flag_assignment = '=';
 
     //
     // Turn on value.
     //
-    static constexpr character* c_on_value = "on";
+    static constexpr const character* c_on_value = "on";
 
     //
     // Turn off value.
     //
-    static constexpr character* c_off_value = "off";
+    static constexpr const character* c_off_value = "off";
 
     //
     // Debug mode enabled flag name.
     //
-    static constexpr character c_debug_mode_enabled_flag = 'd';
+    static constexpr const character c_debug_mode_enabled_flag = 'd';
 
     //
     // Logs directory flag name.
     //
-    static constexpr character c_logs_directory_flag = 'l';
+    static constexpr const character c_logs_directory_flag = 'l';
     
 };
 

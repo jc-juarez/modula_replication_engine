@@ -34,14 +34,14 @@ int main(int argc, char** argv)
     //
     // Initialize singleton logger for the system.
     //
-    logger::initialize(&(modula_system_configuration.m_logger_configuration));
+    logger::initialize(modula_system_configuration.m_logger_configuration);
 
     std::unique_ptr<modula::modula> modula_replication_engine = std::make_unique<modula::modula>(
         &status);
 
     if (status::failed(status))
     {
-        throw_exception(std::format("<!> Modula replication engine initialization failed. Status={:#X}.",
+        throw_exception(std::format("<!> Modula replication engine startup failed. Status={:#X}.",
             status));
     }
 

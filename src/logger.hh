@@ -11,8 +11,9 @@
 #include <mutex>
 #include <random>
 #include <format> // Added in header file for global access by including it.
+#include <unistd.h>
 
-#ifndef LOGGER_
+#ifndef LOGGER_ 
 #define LOGGER_
 
 namespace modula
@@ -69,7 +70,7 @@ public:
     static
     void
     initialize(
-        const logger_configuration* p_logger_configuration);
+        const logger_configuration& p_logger_configuration);
 
     //
     // Logging external method.
@@ -89,7 +90,7 @@ private:
     void
     log_message(
         const log_level& p_log_level,
-        const std::string&& p_message);
+        const character* p_message);
 
     //
     // Generates a random <8 bytes>-<8 bytes> unique identifier. 
@@ -107,9 +108,24 @@ private:
     // Constructs the log message with formatting.
     //
     std::string
-    static create_formatted_log_message(
+    create_formatted_log_message(
         const log_level& p_log_level,
-        const std::string&& p_message);
+        const character* p_message);
+
+    //
+    // Logs a message to a log file.
+    //
+    status_code
+    log_to_file(
+        const character* p_message);
+
+    //
+    // Logs a message to the console.
+    //
+    static
+    void
+    log_to_console(
+        const character* p_message);
 
     //
     // Flag for determining is the singleton instance is initialized.
@@ -119,37 +135,42 @@ private:
     //
     // Text for info level logs.
     //
-    static constexpr character* c_info_log_level = "Info";
+    static constexpr const character* c_info_log_level = "Info";
 
     //
     // Text for warning level logs.
     //
-    static constexpr character* c_warning_log_level = "Warning";
+    static constexpr const character* c_warning_log_level = "Warning";
 
     //
     // Text for error level logs.
     //
-    static constexpr character* c_error_log_level = "Error";
+    static constexpr const character* c_error_log_level = "Error";
 
     //
     // Text for critical level logs.
     //
-    static constexpr character* c_critical_log_level = "Critical";
+    static constexpr const character* c_critical_log_level = "Critical";
 
     //
     // Text for default level logs.
     //
-    static constexpr character* c_default_log_level = "Unknown";
+    static constexpr const character* c_default_log_level = "Unknown";
 
     //
     // Session logs directory prefix.
     //
-    static constexpr character* c_session_logs_directory_prefix = "modula-logs-";
+    static constexpr const character* c_session_logs_directory_prefix = "modula-logs-";
 
     //
     // Logs files extension.
     //
-    static constexpr character* c_logs_files_extension = ".log";
+    static constexpr const character* c_logs_files_extension = ".log";
+
+    //
+    // Modula executable name.
+    //
+    static constexpr const character* c_modula = "modula";
 
     //
     // Lock for synchronizing access across threads.
@@ -172,9 +193,9 @@ private:
     bool m_debug_mode_enabled;
 
     //
-    // Path to the directory where system logs will be stored.
+    // Path to the directory where system logs will be stored for the session.
     //
-    std::string m_logs_directory_path;
+    std::string m_session_logs_directory_path;
 
     //
     // Logger session ID.
@@ -184,7 +205,12 @@ private:
     //
     // Logs files count.  
     //
-    // uint64 m_logs_files_count;
+    uint64 m_logs_files_count;
+
+    //
+    // Process ID for the session.
+    //
+    pid_t m_process_id;
     
 };
 

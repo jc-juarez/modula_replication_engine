@@ -63,27 +63,6 @@ system_configuration::system_configuration(
 }
 
 status_code
-system_configuration::parse_on_off_to_bool(
-    const std::string& p_value,
-    bool* p_bool)
-{
-    if (p_value == c_on_value)
-    {
-        *p_bool = true;
-
-        return status::success;
-    }
-    else if (p_value == c_off_value)
-    {
-        *p_bool = false;
-
-        return status::success;
-    }
-
-    return status::incorrect_parameters;
-}
-
-status_code
 system_configuration::parse_command_line_arguments(
     const std::vector<std::string>& p_command_line_arguments,
     std::string* p_logs_directory_path)
@@ -161,6 +140,27 @@ system_configuration::parse_command_line_arguments(
     }
 
     return status::success;
+}
+
+status_code
+system_configuration::parse_on_off_to_bool(
+    const std::string& p_value,
+    bool* p_bool)
+{
+    if (p_value == c_on_value)
+    {
+        *p_bool = true;
+
+        return status::success;
+    }
+    else if (p_value == c_off_value)
+    {
+        *p_bool = false;
+
+        return status::success;
+    }
+
+    return status::incorrect_parameters;
 }
 
 } // namespace modula.

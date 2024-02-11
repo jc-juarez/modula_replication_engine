@@ -13,7 +13,9 @@
 #include <limits>
 #include <sstream>
 #include <iostream>
+#include <syslog.h>
 #include <filesystem>
+#include <sys/syscall.h>
 
 namespace modula
 {
@@ -22,7 +24,9 @@ bool logger::s_initialized = false;
 
 logger::logger(
     const logger_configuration* p_logger_configuration)
-    : m_random_number_distribution(0, std::numeric_limits<uint64>::max())
+    : m_random_number_distribution(0, std::numeric_limits<uint64>::max()),
+      m_logs_files_count(0),
+      m_process_id(getpid())
 {
     //
     // The logger is agnostic to the default configurations given by the
@@ -35,7 +39,7 @@ logger::logger(
     }
 
     m_debug_mode_enabled = p_logger_configuration->m_debug_mode_enabled;
-    m_logs_directory_path = p_logger_configuration->m_logs_directory_path;
+    const std::string logs_directory_path = p_logger_configuration->m_logs_directory_path;
 
     //
     // Initialize the random number generator.
@@ -59,7 +63,7 @@ logger::logger(
     do
     {
         session_id = generate_unique_identifier();
-        session_logs_directory_path = m_logs_directory_path;
+        session_logs_directory_path = logs_directory_path;
         session_logs_directory_path.append(c_session_logs_directory_prefix + session_id);
     }
     while (std::filesystem::exists(session_logs_directory_path));
@@ -78,17 +82,25 @@ logger::logger(
             exception.c_str(),
             status));
     }
+
+    m_session_logs_directory_path = session_logs_directory_path;
 }
 
 void
 logger::initialize(
-    const logger_configuration* p_logger_configuration)
+    const logger_configuration& p_logger_configuration)
 {
+    if (s_initialized)
+    {
+        throw_exception(std::format("<!> Modula replication engine logger has already been initialized. Status={:#X}.",
+            status::logger_already_initialized));
+    }
+
     s_initialized = true;
 
     log(log_level::info,
         "Modula replication engine logger has been initialized.",
-        p_logger_configuration);
+        &p_logger_configuration);
 }
 
 void
@@ -112,32 +124,45 @@ logger::log(
 
     logger_singleton_instance.log_message(
         p_log_level,
-        std::move(p_message));
+        p_message.c_str());
 }
 
 void
 logger::log_message(
     const log_level& p_log_level,
-    const std::string&& p_message)
+    const character* p_message)
 {
     const std::string formatted_log_message = create_formatted_log_message(
         p_log_level,
-        std::move(p_message));
+        p_message);
 
     {
         std::scoped_lock<std::mutex> lock(m_lock);
 
         if (m_debug_mode_enabled)
         {
-            // Create a wrapper function around this.
-            std::cout << formatted_log_message.c_str() << std::endl;
+            log_to_console(formatted_log_message.c_str());
         }
 
-        // Create a function to append the current log to a file.
-        // This function should first check if the session-id subdirectory is empty; if so, it must create a new file. (Files are: log_{session-id}_{logs_file_count}.log)
-        // If not empty, it must be able to grab the last file (can be identified by the logs_file_count in its name, if fails then create a new file). Be sure to never overwrite existing files.
-        // This must be able to determine the size in MiB of the previous file: if it exceeds a threshold it needs a new file, if not write to that prev file.
-        // append_log_to_file(std::move(formatted_log_message));
+        status_code status = log_to_file(formatted_log_message.c_str());
+
+        //
+        // Syslog retains errors and lost messages if any problem occurs.
+        //
+        if (status::failed(status))
+        {
+            std::stringstream lost_message_stream;
+
+            lost_message_stream
+                << "Status="
+                << status
+                << ", Message="
+                << formatted_log_message.c_str();
+
+            openlog(c_modula, LOG_PID | LOG_CONS, LOG_USER);
+            syslog(LOG_ERR, "%s", lost_message_stream.str().c_str());
+            closelog();
+        }
     }
 }
 
@@ -163,9 +188,9 @@ logger::generate_random_number()
 std::string
 logger::create_formatted_log_message(
     const log_level& p_log_level,
-    const std::string&& p_message)
+    const character* p_message)
 {
-    character* level = nullptr;
+    const character* level = nullptr;
 
     switch (static_cast<uint8>(p_log_level))
     {
@@ -203,16 +228,53 @@ logger::create_formatted_log_message(
 
     std::stringstream formatted_log_message;
 
-    // Also log the m_session_id.
     formatted_log_message
         << "["
-        << timestamp::get_current_time().to_string()
-        << "] <"
+        << timestamp::get_current_time().to_string().c_str()
+        << "] ("
+        << m_session_id.c_str()
+        << ") PID="
+        << m_process_id
+        << ", TID="
+        << syscall(SYS_gettid)
+        << ". <"
         << level
         << "> "
         << p_message;
 
     return formatted_log_message.str();
+}
+
+status_code
+logger::log_to_file(
+    const character* p_message)
+{
+    // Create a function to append the current log to a file.
+    // This function should first check if the session-id subdirectory is empty; if so, it must create a new file. (Files are: log_{session-id}_{logs_file_count}.log)
+    // If not empty, it must be able to grab the last file (can be identified by the logs_file_count in its name, if fails then create a new file). Be sure to never overwrite existing files.
+    // This must be able to determine the size in MiB of the previous file: if it exceeds a threshold it needs a new file, if not write to that prev file.
+    // append_log_to_file(std::move(formatted_log_message));
+
+    status_code status = status::success;
+
+    //
+    // Idemponent logging even if the directory is not present.
+    //
+    if (!std::filesystem::exists(m_session_logs_directory_path))
+    {
+        status = create_directory(m_session_logs_directory_path);
+
+        return_status_if_failed(status)
+    }
+
+    return status;
+}
+
+void
+logger::log_to_console(
+    const character* p_message)
+{
+    std::cout << p_message << std::endl;
 }
 
 } // namespace modula.
