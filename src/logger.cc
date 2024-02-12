@@ -11,7 +11,6 @@
 
 #include <ctime>
 #include <limits>
-#include <sstream>
 #include <iostream>
 #include <syslog.h>
 #include <sys/syscall.h>
@@ -159,16 +158,8 @@ logger::log_message(
         //
         if (status::failed(status))
         {
-            std::stringstream lost_message_stream;
-
-            lost_message_stream
-                << "Status="
-                << status
-                << ", Message="
-                << formatted_log_message.c_str();
-
             openlog(c_modula, LOG_PID | LOG_CONS, LOG_USER);
-            syslog(LOG_ERR, "%s", lost_message_stream.str().c_str());
+            syslog(LOG_ERR, "%s", std::format("Status={}, Message={}", status, formatted_log_message.c_str()).c_str());
             closelog();
         }
     }
@@ -177,14 +168,10 @@ logger::log_message(
 std::string
 logger::generate_unique_identifier()
 {
-    std::stringstream unique_identifier_stream;
-
-    unique_identifier_stream
-        << std::to_string(generate_random_number())
-        << "-"
-        << std::to_string(generate_random_number());
-
-    return unique_identifier_stream.str();
+    return std::format(
+        "{}-{}",
+        generate_random_number(),
+        generate_random_number());
 }
 
 uint64
@@ -234,24 +221,14 @@ logger::create_formatted_log_message(
         }
     }
 
-    std::stringstream formatted_log_message;
-
-    formatted_log_message
-        << "["
-        << timestamp::get_current_time().to_string().c_str()
-        << "] ("
-        << m_session_id.c_str()
-        << ") PID="
-        << m_process_id
-        << ", TID="
-        << syscall(SYS_gettid)
-        << ". <"
-        << level
-        << "> "
-        << p_message
-        << "\n";
-
-    return formatted_log_message.str();
+    return std::format(
+        "[{}] ({}) PID={}, TID={}. <{}> {}\n",
+        timestamp::get_current_time().to_string().c_str(),
+        m_session_id.c_str(),
+        m_process_id,
+        syscall(SYS_gettid),
+        level,
+        p_message);
 }
 
 status_code
@@ -311,7 +288,7 @@ std::filesystem::path
 logger::get_current_logs_file_path()
 {
     std::string current_logs_file_name = std::format(
-        "log_{}_{}{}",
+        "log_{}_{}.{}",
         m_session_id,
         m_logs_files_count,
         c_logs_files_extension);

@@ -173,7 +173,7 @@ private:
     //
     // Logs files extension.
     //
-    static constexpr const character* c_logs_files_extension = ".log";
+    static constexpr const character* c_logs_files_extension = "log";
 
     //
     // Modula executable name.
