@@ -140,6 +140,16 @@ public:
     //
     static constexpr status_code logger_already_initialized = 0x8'0000011;
 
+    //
+    // Failed to write to a file.
+    //
+    static constexpr status_code file_write_failed = 0x8'0000012;
+
+    //
+    // Failed to log to a file because incremental search reached its retry limit.
+    //
+    static constexpr status_code logging_incremental_search_failed = 0x8'0000013;
+
 };
 
 } // namespace modula.

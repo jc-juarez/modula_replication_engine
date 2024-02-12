@@ -110,6 +110,21 @@ create_directory(
     const std::string& p_directory_name,
     std::string* p_exception = nullptr);
 
+//
+// Creates and/or appends data to the specified file.
+//
+status_code
+append_content_to_file(
+    const std::string& p_file_path,
+    const character* p_content);
+
+//
+// Gets the size of a file in MiB
+//
+uint32
+get_file_size(
+    const std::string& p_file_path);
+
 } // namespace modula.
 
 #endif

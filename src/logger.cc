@@ -14,7 +14,6 @@
 #include <sstream>
 #include <iostream>
 #include <syslog.h>
-#include <filesystem>
 #include <sys/syscall.h>
 
 namespace modula
@@ -23,6 +22,7 @@ namespace modula
 bool logger::s_initialized = false;
 
 logger::logger(
+    std::string* p_initial_message,
     const logger_configuration* p_logger_configuration)
     : m_random_number_distribution(0, std::numeric_limits<uint64>::max()),
       m_logs_files_count(0),
@@ -39,7 +39,7 @@ logger::logger(
     }
 
     m_debug_mode_enabled = p_logger_configuration->m_debug_mode_enabled;
-    const std::string logs_directory_path = p_logger_configuration->m_logs_directory_path;
+    const std::filesystem::path logs_directory_path = std::filesystem::absolute(p_logger_configuration->m_logs_directory_path);
 
     //
     // Initialize the random number generator.
@@ -84,6 +84,13 @@ logger::logger(
     }
 
     m_session_logs_directory_path = session_logs_directory_path;
+
+    p_initial_message->append("Logs will be stored at '" + m_session_logs_directory_path.string() + "'.");
+
+    //
+    // Set the initially pointed logs file after successful initialization.
+    //
+    m_current_logs_file_path = get_current_logs_file_path();
 }
 
 void
@@ -99,14 +106,14 @@ logger::initialize(
     s_initialized = true;
 
     log(log_level::info,
-        "Modula replication engine logger has been initialized.",
+        "Modula replication engine logger has been initialized. ",
         &p_logger_configuration);
 }
 
 void
 logger::log(
     const log_level& p_log_level,
-    const std::string&& p_message,
+    std::string&& p_message,
     const logger_configuration* p_logger_configuration)
 {
     if (!s_initialized)
@@ -120,6 +127,7 @@ logger::log(
     // singleton through the initialize method.
     //
     static logger logger_singleton_instance(
+        &p_message,
         p_logger_configuration);
 
     logger_singleton_instance.log_message(
@@ -240,7 +248,8 @@ logger::create_formatted_log_message(
         << ". <"
         << level
         << "> "
-        << p_message;
+        << p_message
+        << "\n";
 
     return formatted_log_message.str();
 }
@@ -249,12 +258,6 @@ status_code
 logger::log_to_file(
     const character* p_message)
 {
-    // Create a function to append the current log to a file.
-    // This function should first check if the session-id subdirectory is empty; if so, it must create a new file. (Files are: log_{session-id}_{logs_file_count}.log)
-    // If not empty, it must be able to grab the last file (can be identified by the logs_file_count in its name, if fails then create a new file). Be sure to never overwrite existing files.
-    // This must be able to determine the size in MiB of the previous file: if it exceeds a threshold it needs a new file, if not write to that prev file.
-    // append_log_to_file(std::move(formatted_log_message));
-
     status_code status = status::success;
 
     //
@@ -267,14 +270,60 @@ logger::log_to_file(
         return_status_if_failed(status)
     }
 
+    //
+    // Incremental search for determining the file on which to log the message. Performance of
+    // this logging mechanism can be impacted if other processes interfere with the directory.
+    // In case of continuous errors that exceed a retry limit, the operation is considered failed.
+    //
+    std::filesystem::path current_logs_file;
+
+    for (uint16 retry_count = 1; retry_count <= c_max_incremental_search_retry_count; ++retry_count)
+    {
+        //
+        // If the file exists ensure that it has not exceeded the size limit; if it 
+        // has, rollover the logs file count and switch the currently pointed logs file.
+        //
+        if (!std::filesystem::exists(m_current_logs_file_path) ||
+            get_file_size(m_current_logs_file_path.string()) < c_max_logs_file_size_mib)
+        {
+            status = append_content_to_file(
+                m_current_logs_file_path,
+                p_message);
+
+            return_status_if_failed(status)
+
+            break;
+        }
+
+        if (retry_count == c_max_incremental_search_retry_count)
+        {
+            return status::logging_incremental_search_failed;
+        }
+
+        ++m_logs_files_count;
+        m_current_logs_file_path = get_current_logs_file_path();
+    }
+
     return status;
+}
+
+std::filesystem::path
+logger::get_current_logs_file_path()
+{
+    std::string current_logs_file_name = std::format(
+        "log_{}_{}{}",
+        m_session_id,
+        m_logs_files_count,
+        c_logs_files_extension);
+
+    return m_session_logs_directory_path / current_logs_file_name;
 }
 
 void
 logger::log_to_console(
     const character* p_message)
 {
-    std::cout << p_message << std::endl;
+    std::cout << p_message;
 }
 
 } // namespace modula.

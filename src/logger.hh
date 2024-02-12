@@ -12,6 +12,7 @@
 #include <random>
 #include <format> // Added in header file for global access by including it.
 #include <unistd.h>
+#include <filesystem>
 
 #ifndef LOGGER_ 
 #define LOGGER_
@@ -60,6 +61,7 @@ private:
     // Private constructor for the singleton instance.
     //
     logger(
+        std::string* p_initial_message,
         const logger_configuration* p_logger_configuration);
 
 public:
@@ -79,7 +81,7 @@ public:
     void
     log(
         const log_level& p_log_level,
-        const std::string&& p_message,
+        std::string&& p_message,
         const logger_configuration* p_logger_configuration = nullptr);
 
 private:
@@ -118,6 +120,12 @@ private:
     status_code
     log_to_file(
         const character* p_message);
+
+    //
+    // Generates the curently pointed logs file path.
+    //
+    std::filesystem::path
+    get_current_logs_file_path();
 
     //
     // Logs a message to the console.
@@ -173,6 +181,16 @@ private:
     static constexpr const character* c_modula = "modula";
 
     //
+    // Max size in MiB for individual logs files.
+    //
+    static constexpr uint8 c_max_logs_file_size_mib = 10u;
+
+    //
+    // Max retries count for incremental search for logging.
+    //
+    static constexpr uint8 c_max_incremental_search_retry_count = 100u;
+
+    //
     // Lock for synchronizing access across threads.
     //
     std::mutex m_lock;
@@ -195,7 +213,7 @@ private:
     //
     // Path to the directory where system logs will be stored for the session.
     //
-    std::string m_session_logs_directory_path;
+    std::filesystem::path m_session_logs_directory_path;
 
     //
     // Logger session ID.
@@ -206,6 +224,11 @@ private:
     // Logs files count.  
     //
     uint64 m_logs_files_count;
+
+    //
+    // Path to the currently pointed logs file.
+    //
+    std::filesystem::path m_current_logs_file_path;
 
     //
     // Process ID for the session.
