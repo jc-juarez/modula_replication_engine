@@ -5,9 +5,9 @@
 // Author: jcjuarez
 // *************************************
 
+#include "logger.hh"
 #include "system_configuration.hh"
 
-#include <cstdlib>
 #include <unordered_set>
 
 namespace modula
@@ -33,6 +33,9 @@ system_configuration::set_logs_directory_path(
 
     if (home_environment_variable == nullptr)
     {
+        logger::log_error_fallback(std::format("<!> Modula replication engine system configuration could not access the '{}' environment variable.\n",
+            c_default_logs_directory_environment_variable).c_str());
+        
         return status::environment_variable_access_failed;
     }
 
@@ -98,7 +101,10 @@ system_configuration::parse_command_line_arguments(
         if (flag.size() < minimum_flag_size ||
             flag[flag_indicator_symbol_index] != c_flag_indicator ||
             flag[flag_assignment_symbol_index] != c_flag_assignment)
-        {
+        {            
+            logger::log_error_fallback(std::format("<!> Modula replication engine could not parse the '{}' flag.\n",
+                flag.c_str()).c_str());
+
             return status::malformed_command_line_arguments;
         }
 
@@ -109,6 +115,9 @@ system_configuration::parse_command_line_arguments(
         //
         if (available_flags.find(flag_name) == available_flags.end())
         {
+            logger::log_error_fallback(std::format("<!> Modula replication engine could not recognize the '{}' flag name.\n",
+                flag_name).c_str());
+
             return status::configuration_flag_not_recognized;
         }
 
@@ -122,7 +131,13 @@ system_configuration::parse_command_line_arguments(
                     flag_value,
                     &(m_logger_configuration.m_debug_mode_enabled));
 
-                return_status_if_failed(status)
+                if (status::failed(status))
+                {
+                    logger::log_error_fallback(std::format("<!> Modula replication engine could not parse the '{}' flag value.\n",
+                        flag_value).c_str());
+
+                    return status;
+                }
 
                 break;
             }

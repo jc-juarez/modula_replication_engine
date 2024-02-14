@@ -25,7 +25,7 @@ filesystem_monitor::filesystem_monitor(
 {
     m_inotify_handle = inotify_init();
 
-    if (!is_file_descriptor_valid(m_inotify_handle))
+    if (!utilities::is_file_descriptor_valid(m_inotify_handle))
     {
         p_status = status::inotify_startup_failed;
 
@@ -58,7 +58,7 @@ filesystem_monitor::filesystem_monitor(
             replication_engine_name.c_str(),
             IN_CREATE | IN_MODIFY | IN_DELETE);
     
-        if (!is_file_descriptor_valid(directory_watch_descriptor))
+        if (!utilities::is_file_descriptor_valid(directory_watch_descriptor))
         {
             p_status = status::directory_watch_descriptor_creation_failed;
 

@@ -27,23 +27,37 @@ int main(int argc, char** argv)
 
     if (status::failed(status))
     {
-        throw_exception(std::format("<!> Modula replication engine initial system configuration failed. Status={:#X}.",
-            status));
+        logger::log_error_fallback(std::format("<!> Modula replication engine initial system configuration failed. Status={:#X}.\n",
+            status).c_str());
+
+        std::exit(EXIT_FAILURE);
     }
 
     //
     // Initialize singleton logger for the system.
     //
-    logger::initialize(modula_system_configuration.m_logger_configuration);
+    status = logger::initialize(modula_system_configuration.m_logger_configuration);
+
+    if (status::failed(status))
+    {
+        logger::log_error_fallback(std::format("<!> Modula replication engine initial system configuration failed. Status={:#X}.\n",
+            status).c_str());
+
+        std::exit(EXIT_FAILURE);
+    }
 
     std::unique_ptr<modula::modula> modula_replication_engine = std::make_unique<modula::modula>(
         &status);
 
     if (status::failed(status))
     {
-        throw_exception(std::format("<!> Modula replication engine startup failed. Status={:#X}.",
-            status));
+        logger::log_error_fallback(std::format("<!> Modula replication engine startup failed. Status={:#X}.\n",
+            status).c_str());
+
+        std::exit(EXIT_FAILURE);
     }
 
     forever {}
+
+    std::exit(EXIT_SUCCESS);
 }

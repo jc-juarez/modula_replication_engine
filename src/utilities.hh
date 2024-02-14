@@ -89,18 +89,17 @@ using double_precision = double;
 using file_descriptor = int;
 
 //
+// Utility functions.
+//
+namespace utilities
+{
+
+//
 // Determines whether a file descriptor is valid.
 //
 bool
 is_file_descriptor_valid(
     const file_descriptor& p_file_descriptor);
-
-//
-// Throws an standard exception with the specified message.
-//
-void
-throw_exception(
-    const std::string&& p_message);
 
 //
 // Creates the specified directory recursively.
@@ -124,6 +123,8 @@ append_content_to_file(
 uint32
 get_file_size(
     const std::string& p_file_path);
+
+} // namespace utilities.
 
 } // namespace modula.
 

@@ -2,6 +2,14 @@
 
 Modula Replication Engine is a file replication engine for system-wide real-time replication implemented in C++ for GNU/Linux operating systems.
 
+How to Run Modula
+==========
+
+First, ensure syslog is running on the GNU/Linux system:
+```shell
+sudo service rsyslog start
+```
+
 How to Build Modula from source
 ==========
 

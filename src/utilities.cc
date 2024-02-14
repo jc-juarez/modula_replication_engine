@@ -14,18 +14,14 @@
 namespace modula
 {
 
+namespace utilities
+{
+
 bool
 is_file_descriptor_valid(
     const file_descriptor& p_file_descriptor)
 {
     return p_file_descriptor != -1;
-}
-
-void
-throw_exception(
-    const std::string&& p_message)
-{
-    throw std::runtime_error(p_message.c_str());
 }
 
 status_code
@@ -89,5 +85,7 @@ get_file_size(
 
     return file_size_mib;
 }
+
+} // namespace utilities.
 
 } // namespace modula.

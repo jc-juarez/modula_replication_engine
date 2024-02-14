@@ -61,6 +61,7 @@ private:
     // Private constructor for the singleton instance.
     //
     logger(
+        status_code* p_status,
         std::string* p_initial_message,
         const logger_configuration* p_logger_configuration);
 
@@ -70,7 +71,7 @@ public:
     // Initialize singleton logger instance. Must be called only once.
     //
     static
-    void
+    status_code
     initialize(
         const logger_configuration& p_logger_configuration);
 
@@ -82,7 +83,16 @@ public:
     log(
         const log_level& p_log_level,
         std::string&& p_message,
+        status_code* p_status = nullptr,
         const logger_configuration* p_logger_configuration = nullptr);
+
+    //
+    // Default error logging fallback mechanism to console and syslog.
+    //
+    static
+    void
+    log_error_fallback(
+        const character* p_message);
 
 private:
 
@@ -132,7 +142,23 @@ private:
     //
     static
     void
-    log_to_console(
+    log_message_to_console(
+        const character* p_message);
+
+    //
+    // Logs an error to the console.
+    //
+    static
+    void
+    log_error_to_console(
+        const character* p_message);
+
+    //
+    // Logs a message to syslog.
+    //
+    static
+    void
+    log_to_syslog(
         const character* p_message);
 
     //
@@ -188,7 +214,7 @@ private:
     //
     // Max retries count for incremental search for logging.
     //
-    static constexpr uint8 c_max_incremental_search_retry_count = 100u;
+    static constexpr uint8 c_max_incremental_search_retry_count = 10u;
 
     //
     // Lock for synchronizing access across threads.

@@ -8,6 +8,7 @@
 #include <filesystem>
 
 #include "directory.hh"
+#include "utilities.hh"
 
 namespace modula
 {
@@ -20,7 +21,7 @@ directory::directory(
     if (is_target_directory &&
         !std::filesystem::exists(p_name))
     {
-        std::filesystem::create_directory(p_name);
+        utilities::create_directory(p_name);
     }
 }
 

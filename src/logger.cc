@@ -21,6 +21,7 @@ namespace modula
 bool logger::s_initialized = false;
 
 logger::logger(
+    status_code* p_status,
     std::string* p_initial_message,
     const logger_configuration* p_logger_configuration)
     : m_random_number_distribution(0, std::numeric_limits<uint64>::max()),
@@ -33,8 +34,11 @@ logger::logger(
     //
     if (p_logger_configuration == nullptr)
     {
-        throw_exception(std::format("<!> Modula replication engine logger has received incorrect initialization configuration parameters. Status={:#X}.",
-            status::incorrect_parameters));
+        *p_status = status::incorrect_parameters;
+        
+        log_error_fallback(std::format("<!> Modula replication engine logger has received incorrect initialization configuration parameters.\n").c_str());
+
+        return;
     }
 
     m_debug_mode_enabled = p_logger_configuration->m_debug_mode_enabled;
@@ -70,16 +74,17 @@ logger::logger(
     m_session_id = session_id;
 
     std::string exception;
-    status_code status = create_directory(
+    *p_status = utilities::create_directory(
         session_logs_directory_path.string(),
         &exception);
 
-    if (status::failed(status))
+    if (status::failed(*p_status))
     {
-        throw_exception(std::format("<!> Modula replication engine logger failed to create session logs directory '{}'. Exception: '{}', Status={:#X}.",
+        log_error_fallback(std::format("<!> Modula replication engine logger failed to create session logs directory '{}'. Exception: '{}'.\n",
             session_logs_directory_path.string().c_str(),
-            exception.c_str(),
-            status));
+            exception.c_str()).c_str());
+
+        return;
     }
 
     m_session_logs_directory_path = session_logs_directory_path;
@@ -92,33 +97,42 @@ logger::logger(
     m_current_logs_file_path = get_current_logs_file_path();
 }
 
-void
+status_code
 logger::initialize(
     const logger_configuration& p_logger_configuration)
 {
     if (s_initialized)
     {
-        throw_exception(std::format("<!> Modula replication engine logger has already been initialized. Status={:#X}.",
-            status::logger_already_initialized));
+        log_error_fallback(std::format("<!> Modula replication engine logger has not been yet initialized.\n").c_str());
+
+        return status::logger_not_initialized;
     }
 
     s_initialized = true;
 
+    status_code status = status::success;
+
     log(log_level::info,
         "Modula replication engine logger has been initialized. ",
+        &status,
         &p_logger_configuration);
+
+    return status;
 }
 
 void
 logger::log(
     const log_level& p_log_level,
     std::string&& p_message,
+    status_code* p_status,
     const logger_configuration* p_logger_configuration)
 {
     if (!s_initialized)
     {
-        throw_exception(std::format("<!> Modula replication engine logger has not been yet initialized. Status={:#X}.",
-            status::logger_not_initialized));
+        log_error_fallback(std::format("<!> Modula replication engine logger has not been yet initialized.\n",
+            status::logger_not_initialized).c_str());
+
+        return;
     }
 
     //
@@ -126,12 +140,27 @@ logger::log(
     // singleton through the initialize method.
     //
     static logger logger_singleton_instance(
+        p_status,
         &p_message,
         p_logger_configuration);
+
+    if (p_status != nullptr &&
+        status::failed(*p_status))
+    {
+        return;
+    }
 
     logger_singleton_instance.log_message(
         p_log_level,
         p_message.c_str());
+}
+
+void
+logger::log_error_fallback(
+    const character* p_message)
+{
+    log_to_syslog(p_message);
+    log_error_to_console(p_message);
 }
 
 void
@@ -148,7 +177,7 @@ logger::log_message(
 
         if (m_debug_mode_enabled)
         {
-            log_to_console(formatted_log_message.c_str());
+            log_message_to_console(formatted_log_message.c_str());
         }
 
         status_code status = log_to_file(formatted_log_message.c_str());
@@ -158,9 +187,10 @@ logger::log_message(
         //
         if (status::failed(status))
         {
-            openlog(c_modula, LOG_PID | LOG_CONS, LOG_USER);
-            syslog(LOG_ERR, "%s", std::format("Status={}, Message={}", status, formatted_log_message.c_str()).c_str());
-            closelog();
+            log_to_syslog(std::format(
+                "Status={}, Message={}",
+                status,
+                formatted_log_message.c_str()).c_str()); 
         }
     }
 }
@@ -242,7 +272,7 @@ logger::log_to_file(
     //
     if (!std::filesystem::exists(m_session_logs_directory_path))
     {
-        status = create_directory(m_session_logs_directory_path);
+        status = utilities::create_directory(m_session_logs_directory_path);
 
         return_status_if_failed(status)
     }
@@ -261,9 +291,9 @@ logger::log_to_file(
         // has, rollover the logs file count and switch the currently pointed logs file.
         //
         if (!std::filesystem::exists(m_current_logs_file_path) ||
-            get_file_size(m_current_logs_file_path.string()) < c_max_logs_file_size_mib)
+            utilities::get_file_size(m_current_logs_file_path.string()) < c_max_logs_file_size_mib)
         {
-            status = append_content_to_file(
+            status = utilities::append_content_to_file(
                 m_current_logs_file_path,
                 p_message);
 
@@ -297,10 +327,26 @@ logger::get_current_logs_file_path()
 }
 
 void
-logger::log_to_console(
+logger::log_message_to_console(
     const character* p_message)
 {
     std::cout << p_message;
+}
+
+void
+logger::log_error_to_console(
+    const character* p_message)
+{
+    std::cerr << p_message;
+}
+
+void
+logger::log_to_syslog(
+    const character* p_message)
+{
+    openlog(c_modula, LOG_PID | LOG_CONS, LOG_USER);
+    syslog(LOG_ERR, "%s", p_message);
+    closelog();
 }
 
 } // namespace modula.
