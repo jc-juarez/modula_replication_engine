@@ -43,7 +43,7 @@ directory::get_name() const
 
 bool
 directory::is_subdirectory_of(
-    const std::string& p_comparing_directory)
+    const std::string& p_comparing_directory) const
 {
     //
     // Resolve symbolic links or other possible relative paths.

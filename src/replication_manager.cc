@@ -13,16 +13,16 @@ namespace modula
 
 replication_manager::replication_manager(
     const std::string& p_initial_configuration_file,
-    status_code& p_status)
+    status_code* p_status)
 {
-    p_status = parse_initial_configuration_file_into_memory(
+    *p_status = parse_initial_configuration_file_into_memory(
         p_initial_configuration_file);
 
-    if (status::failed(p_status))
+    if (status::failed(*p_status))
     {
         logger::log(log_level::critical, std::format("Initial configuration file '{}' parsing failed. Status={:#X}.",
             p_initial_configuration_file.c_str(),
-            p_status));
+            *p_status));
 
         return;
     }
@@ -30,12 +30,12 @@ replication_manager::replication_manager(
     //
     // Initiate an initial full sync on all directories on startup.
     //
-    p_status = execute_full_sync();
+    *p_status = execute_full_sync();
 
-    if (status::failed(p_status))
+    if (status::failed(*p_status))
     {
         logger::log(log_level::critical, std::format("Initial full sync on startup failed. Status={:#X}.",
-            p_status));
+            *p_status));
 
         return;
     }
@@ -45,7 +45,16 @@ replication_manager::replication_manager(
     // engines have been correctly parsed and booted for the system.
     //
     m_replication_tasks_thread_pool = std::make_shared<thread_pool>(
+        p_status,
         c_replication_tasks_thread_pool_size);
+
+    if (status::failed(*p_status))
+    {
+        logger::log(log_level::critical, std::format("Replication tasks shared thread pool could not be started. Status={:#X}.",
+            *p_status));
+
+        return;
+    }
 
     for (std::pair<const std::string, replication_engine>& replication_engine_entry : m_replication_engines)
     {

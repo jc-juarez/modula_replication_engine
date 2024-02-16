@@ -56,7 +56,7 @@ public:
     //
     bool
     is_subdirectory_of(
-        const std::string& p_comparing_directory);
+        const std::string& p_comparing_directory) const;
 
 private:
 

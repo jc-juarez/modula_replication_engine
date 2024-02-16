@@ -213,7 +213,7 @@ logger::generate_random_number()
 std::string
 logger::create_formatted_log_message(
     const log_level& p_log_level,
-    const character* p_message)
+    const character* p_message) const
 {
     const character* level = nullptr;
 
@@ -315,7 +315,7 @@ logger::log_to_file(
 }
 
 std::filesystem::path
-logger::get_current_logs_file_path()
+logger::get_current_logs_file_path() const
 {
     std::string current_logs_file_name = std::format(
         "log_{}_{}.{}",

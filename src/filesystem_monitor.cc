@@ -6,11 +6,13 @@
 // *************************************
 
 #include "logger.hh"
+#include "modula.hh"
 #include "directory.hh"
 #include "filesystem_monitor.hh"
 
 #include <thread>
 #include <cstdlib>
+#include <csignal>
 #include <unistd.h>
 #include <filesystem>
 #include <sys/inotify.h>
@@ -20,17 +22,17 @@ namespace modula
 
 filesystem_monitor::filesystem_monitor(
     std::shared_ptr<replication_manager> p_replication_manager,
-    status_code& p_status) :
+    status_code* p_status) :
     m_replication_manager(p_replication_manager)
 {
     m_inotify_handle = inotify_init();
 
     if (!utilities::is_file_descriptor_valid(m_inotify_handle))
     {
-        p_status = status::inotify_startup_failed;
+        *p_status = status::inotify_startup_failed;
 
         logger::log(log_level::critical, std::format("Inotify instance startup failed. Status={:#X}.",
-            p_status));
+            *p_status));
 
         return;
     }
@@ -44,11 +46,11 @@ filesystem_monitor::filesystem_monitor(
 
         if (!std::filesystem::exists(replication_engine_name))
         {
-            p_status = status::directory_does_not_exist;
+            *p_status = status::directory_does_not_exist;
 
             logger::log(log_level::critical, std::format("Directory '{}' does not exist. Status={:#X}.",
                 replication_engine_name.c_str(),
-                p_status));
+                *p_status));
 
             return;
         }
@@ -60,16 +62,29 @@ filesystem_monitor::filesystem_monitor(
     
         if (!utilities::is_file_descriptor_valid(directory_watch_descriptor))
         {
-            p_status = status::directory_watch_descriptor_creation_failed;
+            *p_status = status::directory_watch_descriptor_creation_failed;
 
             logger::log(log_level::critical, std::format("Watch descriptor for directory '{}' could not be created. Status={:#X}.",
                 replication_engine_name.c_str(),
-                p_status));
+                *p_status));
 
             return;
         }
 
         m_watch_descriptors.emplace_back(directory_watch_descriptor);
+    }
+
+    //
+    // Initialize thread pool for handling dispatcher calls to replication engines.
+    //
+    m_dispatcher_thread_pool = std::make_unique<thread_pool>(
+        p_status,
+        c_dispatcher_thread_pool_size);
+
+    if (status::failed(*p_status))
+    {
+        logger::log(log_level::critical, std::format("Replication task dispatcher thread pool could not be started. Status={:#X}.",
+            *p_status));
     }
 }
 
@@ -83,48 +98,22 @@ filesystem_monitor::~filesystem_monitor()
     close(m_inotify_handle);
 }
 
-status_code
+void
 filesystem_monitor::start_replication_task_dispatcher()
 {
-    status_code status = status::success;
-
     //
-    // Launch the filesystem monitor thread to handle filesystem events.
+    // Register termination handler for external signaling.
     //
-    std::thread replication_task_dispatcher_thread(
-        &filesystem_monitor::replication_task_dispatcher,
-        this);
+    std::signal(SIGTERM, modula::signal_system_termination_handler);
 
-    if (!replication_task_dispatcher_thread.joinable())
-    {
-        status = status::launch_thread_failed;
-        
-        logger::log(log_level::critical, std::format("Replication task dispatcher thread could not be started. Status={:#X}.",
-            status));
-
-        return status;
-    }
-
-    replication_task_dispatcher_thread.detach();
-
-    //
-    // Initialize thread pool for handling dispatcher calls to replication engines.
-    //
-    m_dispatcher_thread_pool = std::make_unique<thread_pool>(
-        c_dispatcher_thread_pool_size);
-
-    return status;
-}
-
-void
-filesystem_monitor::replication_task_dispatcher()
-{
-    forever
+    while (!modula::s_stop_execution)
     {
         uint32 number_bytes_read = read(
             m_inotify_handle,
             m_read_event_buffer,
             c_read_event_buffer_size);
+
+        logger::log(log_level::info, "not yeat");
 
         if (number_bytes_read <= 0)
         {
@@ -177,6 +166,8 @@ filesystem_monitor::replication_task_dispatcher()
             number_bytes_processed += sizeof(struct inotify_event) + filesystem_event->len;
         }
     }
+
+    logger::log(log_level::info, "finished");
 }
 
 } // namespace modula.

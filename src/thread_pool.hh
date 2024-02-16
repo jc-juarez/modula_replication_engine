@@ -8,6 +8,7 @@
 #ifndef THREAD_POOL_
 #define THREAD_POOL_
 
+#include "status.hh"
 #include "utilities.hh"
 
 #include <queue>
@@ -34,6 +35,7 @@ public:
     // Constructor. Initializes the thread pool.
     //
     thread_pool(
+        status_code* p_status,
         const uint16 p_number_threads);
 
     //

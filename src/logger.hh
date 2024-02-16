@@ -122,7 +122,7 @@ private:
     std::string
     create_formatted_log_message(
         const log_level& p_log_level,
-        const character* p_message);
+        const character* p_message) const;
 
     //
     // Logs a message to a log file.
@@ -135,7 +135,7 @@ private:
     // Generates the curently pointed logs file path.
     //
     std::filesystem::path
-    get_current_logs_file_path();
+    get_current_logs_file_path() const;
 
     //
     // Logs a message to the console.

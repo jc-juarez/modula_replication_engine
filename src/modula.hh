@@ -32,10 +32,28 @@ public:
         status_code* p_status);
 
     //
-    // Initializes all system dependencies.
+    // Starts the modula replication engine task dispatcher.
     //
-    status_code
-    initialize_dependencies();
+    void
+    start_engine();
+
+    //
+    // External signal handler for graceful termination.
+    // All async resources in the modula system are handled by thread pools
+    // attached to the main modula handle; once the task dispatcher thread reaches
+    // conclusion, all thread pool destructors will lead to a graceful termination.
+    //
+    static
+    void
+    signal_system_termination_handler(
+        int32 p_signal);
+
+    //
+    // Internal signal to stop the system execution.
+    //
+    static
+    bool
+    s_stop_execution;
 
 private:
 

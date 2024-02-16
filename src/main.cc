@@ -22,8 +22,8 @@ int main(int argc, char** argv)
     // Initialize the system configuration for all components.
     //
     system_configuration modula_system_configuration(
-        command_line_arguments,
-        &status);
+        &status,
+        command_line_arguments);
 
     if (status::failed(status))
     {
@@ -46,6 +46,9 @@ int main(int argc, char** argv)
         std::exit(EXIT_FAILURE);
     }
 
+    //
+    // Initialize the modula replication engine.
+    //
     std::unique_ptr<modula::modula> modula_replication_engine = std::make_unique<modula::modula>(
         &status);
 
@@ -57,7 +60,10 @@ int main(int argc, char** argv)
         std::exit(EXIT_FAILURE);
     }
 
-    forever {}
+    //
+    // Start the modula replication engine system upon successful initialization.
+    //
+    modula_replication_engine->start_engine();
 
     std::exit(EXIT_SUCCESS);
 }

@@ -13,6 +13,7 @@ namespace modula
 {
 
 thread_pool::thread_pool(
+    status_code* p_status,
     const uint16 p_number_threads) :
     m_number_threads(p_number_threads),
     m_stop(false)
@@ -20,9 +21,18 @@ thread_pool::thread_pool(
     //
     // Spawn threads for the thread pool.
     //
-    for (uint16 thread_index = 0; thread_index < m_number_threads; ++thread_index)
+    try
     {
-        m_worker_threads.emplace_back(&thread_pool::task_handler, this);
+        for (uint16 thread_index = 0; thread_index < m_number_threads; ++thread_index)
+        {
+            m_worker_threads.emplace_back(&thread_pool::task_handler, this);
+        }
+    }
+    catch (const std::system_error& e)
+    {
+        *p_status = status::launch_thread_failed;
+
+        return;
     }
 }
 

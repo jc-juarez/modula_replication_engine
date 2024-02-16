@@ -35,7 +35,7 @@ public:
     //
     filesystem_monitor(
         std::shared_ptr<replication_manager> p_replication_manager,
-        status_code& p_status);
+        status_code* p_status);
 
     //
     // Destructor. Closes inotify related file descriptors.
@@ -45,14 +45,8 @@ public:
     //
     // Starts the filesystem monitor dispatcher thread.
     //
-    status_code
-    start_replication_task_dispatcher();
-
-    //
-    // Filesystem monitor thread that dispatches filesystem events.
-    //
     void
-    replication_task_dispatcher();
+    start_replication_task_dispatcher();
 
 private:
 

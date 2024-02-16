@@ -45,8 +45,8 @@ system_configuration::set_logs_directory_path(
 }
 
 system_configuration::system_configuration(
-    const std::vector<std::string>& p_command_line_arguments,
-    status_code* p_status)
+    status_code* p_status,
+    const std::vector<std::string>& p_command_line_arguments)
 {
     std::string logs_directory_path;
 

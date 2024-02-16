@@ -30,7 +30,7 @@ public:
     //
     replication_manager(
         const std::string& p_initial_configuration_file,
-        status_code& p_status);
+        status_code* p_status);
 
     //
     // Determines whether a replication engine exists.
