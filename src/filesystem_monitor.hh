@@ -17,7 +17,9 @@
 #include <mutex>
 #include <string>
 #include <vector>
+#include <thread>
 #include <memory>
+#include <limits>
 #include <sys/inotify.h>
 
 namespace modula
@@ -66,7 +68,7 @@ public:
         status_code* p_status);
 
     //
-    // Destructor. Closes all epoll related file descriptors.
+    // Destructor. Closes all epoll related file descriptors and general cleanup.
     //
     ~filesystem_monitor();
 
@@ -77,6 +79,14 @@ public:
     start_kernel_events_offloader();
 
 private:
+
+    //
+    // Filesystem monitor thread that dispatches replication tasks based
+    // on the filesystem events received from the kernel events offloader.
+    // Polling-and-batching mechanism is used to avoid contention from mutual exclusion.
+    //
+    void
+    replication_tasks_dispatcher();
 
     //
     // Thread pool for replication task dispatcher threads.
@@ -119,6 +129,11 @@ private:
     std::vector<file_descriptor> m_watch_descriptors;
 
     //
+    // Replication tasks dispatcher thread handle.
+    //
+    std::thread m_replication_tasks_dispatcher_thread;
+
+    //
     // Max size for the event buffer of the epoll instance.
     //
     static constexpr uint16 c_epoll_event_buffer_size = 1024u;
@@ -132,6 +147,16 @@ private:
     // Max size in bytes for the read event buffer of the inotify instance.
     //
     static constexpr uint16 c_read_event_buffer_size = 8192u;
+
+    //
+    // Max number of fetched filesystem events for batch-processing.
+    //
+    static constexpr uint16 c_max_number_fetched_filesystem_events = std::numeric_limits<uint16>::max();
+
+    //
+    // Replication tasks dispatcher polling sleep duration in milliseconds.
+    //
+    static constexpr uint8 c_replication_tasks_dispatcher_polling_sleep_ms = 1u;
     
 };
 

@@ -25,7 +25,7 @@ modula::modula(
     status_code* p_status)
 {
     //
-    // Initializes all system dependencies.
+    // Initialize all system dependencies.
     //
     file_descriptor termination_signals_handle;
     std::tie(*p_status, termination_signals_handle) = create_termination_signals_handle();
@@ -50,6 +50,11 @@ modula::modula(
     return_if_failed(*p_status)
 
     logger::log(log_level::info, "Modula replication engine has been successfully initialized.");
+}
+
+modula::~modula()
+{
+    logger::log(log_level::info, "Finishing modula replication engine execution.");
 }
 
 void

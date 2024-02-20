@@ -11,7 +11,6 @@
 #include "status.hh"
 
 #include <string>
-#include <chrono>
 
 namespace modula
 {

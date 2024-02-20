@@ -11,7 +11,7 @@
 #include "filesystem_monitor.hh"
 
 #include <tuple>
-#include <thread>
+#include <chrono>
 #include <cstdlib>
 #include <cstring>
 #include <unistd.h>
@@ -144,6 +144,36 @@ filesystem_monitor::filesystem_monitor(
     }
 
     //
+    // Launch the tasks dispatcher thread for handling filesystem events replication tasks.
+    //
+    try
+    {
+        m_replication_tasks_dispatcher_thread = std::thread(
+            &filesystem_monitor::replication_tasks_dispatcher,
+            this);
+
+        if (!m_replication_tasks_dispatcher_thread.joinable())
+        {
+            *p_status = status::launch_thread_failed;
+
+            logger::log(log_level::critical, std::format("Failed to start the replication tasks dispatcher thread for the system. Status={:#X}.",
+                *p_status));
+
+            return;
+        }
+    }
+    catch (const std::system_error& exception)
+    {
+        *p_status = status::launch_thread_failed;
+
+        logger::log(log_level::critical, std::format("Failed to start the replication tasks dispatcher thread for the system. Exception='{}', Status={:#X}.",
+            exception.what(),
+            *p_status));
+
+        return;
+    }
+    
+    //
     // Initialize thread pool for handling dispatcher calls to replication engines.
     //
     m_dispatcher_thread_pool = std::make_unique<thread_pool>(
@@ -167,6 +197,11 @@ filesystem_monitor::~filesystem_monitor()
     close(m_termination_signals_handle);
     close(m_inotify_handle);
     close(m_epoll_handle);
+
+    //
+    // Ensure the system waits for the replication tasks dispatcher to finish.
+    //
+    m_replication_tasks_dispatcher_thread.join();
 }
 
 void
@@ -294,6 +329,58 @@ filesystem_monitor::start_kernel_events_offloader()
             offloading_filesystem_events_bucket.clear();
         }
     }
+}
+
+void
+filesystem_monitor::replication_tasks_dispatcher()
+{
+    logger::log(log_level::info, "Starting replication tasks dispatcher thread.");
+
+    std::queue<filesystem_event> filesystem_events_batching_queue;
+
+    forever
+    {
+        if (modula::stop_system_execution())
+        {
+            break;
+        }
+
+        {
+            //
+            // Fetch filesystem events from the shared queue and transfer them to a
+            // batch-processing queue for a synchronous thread-pool assignment operation.
+            //
+            std::scoped_lock<std::mutex> lock(m_filesystem_events_queue_lock);
+
+            uint16 number_fetched_filesystem_events = 0;
+
+            while (!m_filesystem_events_queue.empty() && number_fetched_filesystem_events < c_max_number_fetched_filesystem_events)
+            {
+                filesystem_events_batching_queue.push(m_filesystem_events_queue.front());
+
+                m_filesystem_events_queue.pop();
+
+                ++number_fetched_filesystem_events;
+            }
+        }
+
+        while (!filesystem_events_batching_queue.empty())
+        {
+            logger::log(log_level::info, std::format("Processing replication. Name={}, ReplicationAction={}.",
+                filesystem_events_batching_queue.front().m_name,
+                static_cast<uint8>(filesystem_events_batching_queue.front().m_replication_action)));
+
+            filesystem_events_batching_queue.pop();
+        }
+
+        //
+        // Use a polling-sleep mechanism to reduce lock blockage induced by the tasks dispatcher;
+        // the kernel offloader should always have a higher priority for offloading kernel events.
+        //
+        std::this_thread::sleep_for(std::chrono::milliseconds(c_replication_tasks_dispatcher_polling_sleep_ms));
+    }
+
+    logger::log(log_level::info, "Finishing replication tasks dispatcher thread.");
 }
 
 } // namespace modula.

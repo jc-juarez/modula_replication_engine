@@ -32,6 +32,11 @@ public:
         status_code* p_status);
 
     //
+    // Destructor.
+    //
+    ~modula();
+
+    //
     // Starts the modula replication engine events offloader.
     //
     void
@@ -64,12 +69,12 @@ private:
     create_termination_signals_handle();
 
     //
-    //  Replication manager handle.
+    // Replication manager handle.
     //
     std::shared_ptr<replication_manager> m_replication_manager;
 
     //
-    //  Filesystem monitor handle.
+    // Filesystem monitor handle.
     //
     std::unique_ptr<filesystem_monitor> m_filesystem_monitor;
 

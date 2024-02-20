@@ -26,9 +26,16 @@ thread_pool::thread_pool(
         for (uint16 thread_index = 0; thread_index < m_number_threads; ++thread_index)
         {
             m_worker_threads.emplace_back(&thread_pool::task_handler, this);
+
+            if (!m_worker_threads.back().joinable())
+            {
+                *p_status = status::launch_thread_failed;
+
+                return;
+            }
         }
     }
-    catch (const std::system_error& e)
+    catch (const std::system_error& exception)
     {
         *p_status = status::launch_thread_failed;
 

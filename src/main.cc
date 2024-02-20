@@ -30,7 +30,7 @@ int main(int argc, char** argv)
         logger::log_error_fallback(std::format("<!> Modula replication engine initial system configuration failed. Status={:#X}.\n",
             status).c_str());
 
-        std::exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     //
@@ -43,7 +43,7 @@ int main(int argc, char** argv)
         logger::log_error_fallback(std::format("<!> Modula replication engine initial system configuration failed. Status={:#X}.\n",
             status).c_str());
 
-        std::exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     //
@@ -57,7 +57,7 @@ int main(int argc, char** argv)
         logger::log(log_level::critical, std::format("<!> Modula replication engine startup failed. Status={:#X}.",
             status));
 
-        std::exit(EXIT_FAILURE);
+        return EXIT_FAILURE;
     }
 
     //
@@ -65,7 +65,5 @@ int main(int argc, char** argv)
     //
     modula_replication_engine->start_engine();
 
-    logger::log(log_level::info, "Finishing modula replication engine execution.");
-
-    std::exit(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 }
