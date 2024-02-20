@@ -150,6 +150,21 @@ public:
     //
     static constexpr status_code logging_incremental_search_failed = 0x8'0000013;
 
+    //
+    // Failed to create a generic kernel file descriptor handle.
+    //
+    static constexpr status_code file_descriptor_creation_failed = 0x8'0000014;
+
+    //
+    // Failed to block external termination signals.
+    //
+    static constexpr status_code termination_signals_blockage_failed = 0x8'0000015;
+
+    //
+    // Failed to start the epoll instance.
+    //
+    static constexpr status_code epoll_startup_failed = 0x8'0000016;
+
 };
 
 } // namespace modula.

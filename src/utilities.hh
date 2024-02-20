@@ -32,6 +32,11 @@ namespace modula
 #define return_status_if_failed(p_status) if (status::failed(p_status)) { return p_status; }
 
 //
+// Return status if succeeded macro.
+//
+#define return_status_if_succeeded(p_status) if (status::succeeded(p_status)) { return p_status; }
+
+//
 // Unsigned 1 byte.
 //
 using byte = unsigned char;
@@ -89,6 +94,11 @@ using double_precision = double;
 using file_descriptor = int;
 
 //
+// Invalid file descriptor.
+//
+static constexpr file_descriptor c_invalid_file_descriptor = -1;
+
+//
 // Utility functions.
 //
 namespace utilities
@@ -100,6 +110,13 @@ namespace utilities
 bool
 is_file_descriptor_valid(
     const file_descriptor& p_file_descriptor);
+
+//
+// Determines whether a system call failed.
+//
+bool
+system_call_failed(
+    const int32 p_result);
 
 //
 // Creates the specified directory recursively.

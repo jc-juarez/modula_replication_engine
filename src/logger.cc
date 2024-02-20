@@ -284,25 +284,26 @@ logger::log_to_file(
     //
     std::filesystem::path current_logs_file;
 
-    for (uint16 retry_count = 1; retry_count <= c_max_incremental_search_retry_count; ++retry_count)
+    for (uint16 incremental_search_retry_count = 1; incremental_search_retry_count <= c_max_incremental_search_retry_count; ++incremental_search_retry_count)
     {
         //
         // If the file exists ensure that it has not exceeded the size limit; if it 
         // has, rollover the logs file count and switch the currently pointed logs file.
         //
-        if (!std::filesystem::exists(m_current_logs_file_path) ||
-            utilities::get_file_size(m_current_logs_file_path.string()) < c_max_logs_file_size_mib)
+        for (uint16 logs_writing_attempts_retry_count = 1; logs_writing_attempts_retry_count <= c_max_logs_writing_attempts_retry_count; ++logs_writing_attempts_retry_count)
         {
-            status = utilities::append_content_to_file(
-                m_current_logs_file_path,
-                p_message);
+            if (!std::filesystem::exists(m_current_logs_file_path) ||
+                utilities::get_file_size(m_current_logs_file_path.string()) < c_max_logs_file_size_mib)
+            {
+                status = utilities::append_content_to_file(
+                    m_current_logs_file_path,
+                    p_message);
 
-            return_status_if_failed(status)
-
-            break;
+                return_status_if_succeeded(status)
+            }
         }
 
-        if (retry_count == c_max_incremental_search_retry_count)
+        if (incremental_search_retry_count == c_max_incremental_search_retry_count)
         {
             return status::logging_incremental_search_failed;
         }

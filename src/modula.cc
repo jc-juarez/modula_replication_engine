@@ -9,13 +9,17 @@
 #include "modula.hh"
 #include "directory.hh"
 
+#include <cstring>
+#include <csignal>
+#include <sys/signalfd.h>
+
 namespace modula
 {
 
 //
-// Initial state for the stop execution member.
+// Initial state for the stop system execution configuration.
 //
-bool modula::s_stop_execution = false;
+bool modula::s_stop_system_execution = false;
 
 modula::modula(
     status_code* p_status)
@@ -23,6 +27,10 @@ modula::modula(
     //
     // Initializes all system dependencies.
     //
+    file_descriptor termination_signals_handle;
+    std::tie(*p_status, termination_signals_handle) = create_termination_signals_handle();
+
+    return_if_failed(*p_status)
 
     // first initialize the replica manager for:
     // Parsing config file and bringing directories into memory.
@@ -35,6 +43,7 @@ modula::modula(
     return_if_failed(*p_status)
 
     m_filesystem_monitor = std::make_unique<filesystem_monitor>(
+        termination_signals_handle,
         m_replication_manager,
         p_status);
 
@@ -46,19 +55,84 @@ modula::modula(
 void
 modula::start_engine()
 {
-    logger::log(log_level::info, "Starting replication task dispatcher thread.");
+    logger::log(log_level::info, "Starting kernel events offloader thread.");
 
-    m_filesystem_monitor->start_replication_task_dispatcher();
+    m_filesystem_monitor->start_kernel_events_offloader();
+
+    logger::log(log_level::info, "Finishing kernel events offloader thread.");
 }
 
 void
-modula::signal_system_termination_handler(
-    int32 p_signal)
+modula::invoke_system_termination_handler()
 {
-    logger::log(log_level::info, std::format("Received termination signal '{}'. Stopping system execution.",
-        p_signal));
+    if (s_stop_system_execution)
+    {
+        return;
+    }
 
-    s_stop_execution = true;
+    logger::log(log_level::info, "Received termination signal. Stopping system execution.");
+
+    s_stop_system_execution = true;
+}
+
+bool
+modula::stop_system_execution()
+{
+    return s_stop_system_execution;
+}
+
+std::tuple<status_code, file_descriptor>
+modula::create_termination_signals_handle()
+{
+    status_code status = status::success;
+    sigset_t termination_signals_mask;
+    sigemptyset(&termination_signals_mask);
+
+    //
+    // The system handles 'Ctrl-C' and 'kill' commands by itself.
+    //
+    sigaddset(&termination_signals_mask, SIGINT);
+    sigaddset(&termination_signals_mask, SIGTERM);
+
+    if (utilities::system_call_failed(sigprocmask(
+        SIG_BLOCK,
+        &termination_signals_mask,
+        nullptr)))
+    {
+        status = status::termination_signals_blockage_failed;
+
+        logger::log(log_level::critical, std::format("Blockage for termination signals failed. {} (errno {}), Status={:#X}.",
+            std::strerror(errno),
+            errno,
+            status));
+
+        return std::make_tuple(
+            status,
+            c_invalid_file_descriptor);
+    }
+
+    file_descriptor termination_signals_handle = signalfd(
+        -1,
+        &termination_signals_mask,
+        0);
+
+    if (!utilities::is_file_descriptor_valid(termination_signals_handle))
+    {
+        status = status::file_descriptor_creation_failed;
+
+        logger::log(log_level::critical, std::format("Termination signals file descriptor could not be created. {} (errno {}), Status={:#X}.",
+            std::strerror(errno),
+            errno,
+            status));
+
+        return std::make_tuple(
+            status,
+            c_invalid_file_descriptor);
+    }
+
+    return std::make_tuple(
+        status,
+        termination_signals_handle);
 }
 
 } // namespace modula.

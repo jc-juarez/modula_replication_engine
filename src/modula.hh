@@ -32,30 +32,36 @@ public:
         status_code* p_status);
 
     //
-    // Starts the modula replication engine task dispatcher.
+    // Starts the modula replication engine events offloader.
     //
     void
     start_engine();
 
     //
-    // External signal handler for graceful termination.
-    // All async resources in the modula system are handled by thread pools
-    // attached to the main modula handle; once the task dispatcher thread reaches
-    // conclusion, all thread pool destructors will lead to a graceful termination.
+    // Alerts all system components the need for stopping execution.
     //
     static
     void
-    signal_system_termination_handler(
-        int32 p_signal);
+    invoke_system_termination_handler();
 
     //
-    // Internal signal to stop the system execution.
+    // Getter for the internal stop system execution configuration.
     //
     static
     bool
-    s_stop_execution;
+    stop_system_execution();
 
 private:
+
+    //
+    // External signals handler generator for graceful termination. Must be called before
+    // spawning any other threads in the system. Async resources in the modula system are handled by  
+    // thread pools attached to the main modula handle or detached threads; once the events offloader
+    // thread reaches conclusion, all thread pool destructors will lead to a graceful system termination.
+    //
+    static
+    std::tuple<status_code, file_descriptor>
+    create_termination_signals_handle();
 
     //
     //  Replication manager handle.
@@ -66,6 +72,14 @@ private:
     //  Filesystem monitor handle.
     //
     std::unique_ptr<filesystem_monitor> m_filesystem_monitor;
+
+    //
+    // Internal signal to stop the system execution. All indefinitely
+    // running system components must listen to this configuration setting.
+    //
+    static
+    bool
+    s_stop_system_execution;
     
 };
 

@@ -10,22 +10,33 @@
 #include "directory.hh"
 #include "filesystem_monitor.hh"
 
+#include <tuple>
 #include <thread>
 #include <cstdlib>
-#include <csignal>
+#include <cstring>
 #include <unistd.h>
 #include <filesystem>
-#include <sys/inotify.h>
+#include <sys/epoll.h>
 
 namespace modula
 {
 
+filesystem_event::filesystem_event()
+    : m_replication_action(replication_action::invalid),
+      m_name("")
+{}
+
 filesystem_monitor::filesystem_monitor(
+    const file_descriptor p_termination_signals_handle,
     std::shared_ptr<replication_manager> p_replication_manager,
     status_code* p_status) :
+    m_termination_signals_handle(p_termination_signals_handle),
     m_replication_manager(p_replication_manager)
 {
-    m_inotify_handle = inotify_init();
+    //
+    // Start the inotify instance in non-blocking mode.
+    //
+    m_inotify_handle = inotify_init1(IN_NONBLOCK);
 
     if (!utilities::is_file_descriptor_valid(m_inotify_handle))
     {
@@ -75,6 +86,64 @@ filesystem_monitor::filesystem_monitor(
     }
 
     //
+    // Create an epoll instance used for monitoring the kernel inotify
+    // filesystem events along with external system termination signals.
+    //
+    m_epoll_handle = epoll_create1(0);
+
+    if (!utilities::is_file_descriptor_valid(m_epoll_handle))
+    {
+        *p_status = status::epoll_startup_failed;
+
+        logger::log(log_level::critical, std::format("Epoll instance startup failed. Status={:#X}.",
+            *p_status));
+
+        return;
+    }
+
+    //
+    // Setup the epoll events for system termination and filesystem monitoring.
+    //
+    epoll_event event;
+    event.events = EPOLLIN;
+
+    event.data.fd = m_termination_signals_handle;
+
+    if (utilities::system_call_failed(epoll_ctl(
+        m_epoll_handle,
+        EPOLL_CTL_ADD,
+        m_termination_signals_handle,
+        &event)))
+    {
+        *p_status = status::epoll_startup_failed;
+
+        logger::log(log_level::critical, std::format("Failed to attach the termination signals handle to the epoll instance. {} (errno {}), Status={:#X}.",
+            std::strerror(errno),
+            errno,
+            *p_status));
+
+        return;
+    }
+
+    event.data.fd = m_inotify_handle;
+
+    if (utilities::system_call_failed(epoll_ctl(
+        m_epoll_handle,
+        EPOLL_CTL_ADD,
+        m_inotify_handle,
+        &event)))
+    {
+        *p_status = status::epoll_startup_failed;
+
+        logger::log(log_level::critical, std::format("Failed to attach the inotify handle to the epoll instance. {} (errno {}), Status={:#X}.",
+            std::strerror(errno),
+            errno,
+            *p_status));
+
+        return;
+    }
+
+    //
     // Initialize thread pool for handling dispatcher calls to replication engines.
     //
     m_dispatcher_thread_pool = std::make_unique<thread_pool>(
@@ -95,79 +164,118 @@ filesystem_monitor::~filesystem_monitor()
         inotify_rm_watch(m_inotify_handle, watch_descriptor);
     }
     
+    close(m_termination_signals_handle);
     close(m_inotify_handle);
+    close(m_epoll_handle);
 }
 
 void
-filesystem_monitor::start_replication_task_dispatcher()
+filesystem_monitor::start_kernel_events_offloader()
 {
-    //
-    // Register termination handler for external signaling.
-    //
-    std::signal(SIGTERM, modula::signal_system_termination_handler);
-
-    while (!modula::s_stop_execution)
+    forever
     {
-        uint32 number_bytes_read = read(
-            m_inotify_handle,
-            m_read_event_buffer,
-            c_read_event_buffer_size);
+        //
+        // Offload the filesystem inotify events from the internal
+        // kernel queue onto a user-space managed dynamic size queue.
+        //
+        epoll_event epoll_events[c_epoll_event_buffer_size];
 
-        logger::log(log_level::info, "not yeat");
+        uint16 number_epoll_events = epoll_wait(
+            m_epoll_handle,
+            epoll_events,
+            c_epoll_event_buffer_size,
+            -1 /* No timeout for the epoll events. */);
 
-        if (number_bytes_read <= 0)
+        for (uint16 epoll_event_index = 0; epoll_event_index < number_epoll_events; ++epoll_event_index)
         {
-            continue;
-        }
+            epoll_event event = epoll_events[epoll_event_index];
 
-        uint32 number_filesystem_events_processed = 0;
-        uint32 number_bytes_processed = 0;
-
-        while (number_bytes_processed < number_bytes_read)
-        {
-            struct inotify_event* filesystem_event = reinterpret_cast<inotify_event*>(&m_read_event_buffer[number_bytes_processed]);
-
-            if (filesystem_event->len)
+            if (event.data.fd == m_termination_signals_handle)
             {
-                std::string filesystem_event_name(filesystem_event->name);
+                //
+                // The system has been instructed to be terminated.
+                //
+                modula::invoke_system_termination_handler();
 
-                switch (filesystem_event->mask)
+                return;
+            }
+
+            //
+            // Read event buffer of the inotify instance.
+            //
+            static byte read_event_buffer[c_read_event_buffer_size] __attribute__ ((aligned(__alignof__(inotify_event))));
+
+            uint32 number_bytes_read = read(
+                m_inotify_handle,
+                read_event_buffer,
+                c_read_event_buffer_size);
+
+            if (number_bytes_read <= 0)
+            {
+                //
+                // Unknown behavior.
+                //
+                continue;
+            }
+
+            uint32 number_bytes_processed = 0;
+            uint32 number_filesystem_events_processed = 0;
+
+            while (number_bytes_processed < number_bytes_read)
+            {
+                inotify_event* inotify_filesystem_event = reinterpret_cast<inotify_event*>(&read_event_buffer[number_bytes_processed]);
+
+                if (inotify_filesystem_event->len)
                 {
-                    case IN_CREATE:
-                    {
-                        logger::log(log_level::info, std::format("File created: '{}'.",
-                            filesystem_event_name));
+                    filesystem_event event;
 
-                        break;
-                    }
-                    case IN_MODIFY:
-                    {
-                        logger::log(log_level::info, std::format("File modified: '{}'.",
-                            filesystem_event_name));
+                    event.m_name = inotify_filesystem_event->name;
 
-                        break;
-                    }
-                    case IN_DELETE:
+                    if (!event.m_name.empty())
                     {
-                        logger::log(log_level::info, std::format("File deleted: '{}'.",
-                            filesystem_event_name));
+                        //
+                        // Logging is handled by the replication tasks dispatcher.
+                        //
+                        switch (inotify_filesystem_event->mask)
+                        {
+                            case IN_CREATE:
+                            {
+                                event.m_replication_action = replication_action::create;
 
-                        break;
-                    }
-                    default:
-                    {
-                        logger::log(log_level::warning, "Unkwown event type.");
+                                break;
+                            }
+                            case IN_MODIFY:
+                            {
+                                event.m_replication_action = replication_action::update;
 
-                        break;
+                                break;
+                            }
+                            case IN_DELETE:
+                            {
+                                event.m_replication_action = replication_action::remove;
+
+                                break;
+                            }
+                        }
+
+                        if (event.m_replication_action != replication_action::invalid)
+                        {
+                            //
+                            // Append recorded filesystem event to the events queue.
+                            //
+                            {
+                                std::scoped_lock<std::mutex> lock(m_filesystem_events_queue_lock);
+
+                                m_filesystem_events_queue.push(event);
+                            }
+                        }
                     }
                 }
+                
+                number_bytes_processed += sizeof(inotify_event) + inotify_filesystem_event->len;
             }
-            
-            number_bytes_processed += sizeof(struct inotify_event) + filesystem_event->len;
         }
     }
-
-    logger::log(log_level::info, "finished");
 }
 
 } // namespace modula.

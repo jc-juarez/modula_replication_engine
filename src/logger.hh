@@ -20,8 +20,12 @@
 namespace modula
 {
 
+//
+// Log level for logs classification.
+//
 enum class log_level : uint8
 {
+
     //
     // Information level logs.
     // Used for debugging actions occurring in the system.
@@ -45,6 +49,7 @@ enum class log_level : uint8
     // Used for critical error-related events that may provoke a system shutdown.
     //
     critical = 3
+    
 };
 
 struct logger_configuration;
@@ -214,7 +219,12 @@ private:
     //
     // Max retries count for incremental search for logging.
     //
-    static constexpr uint8 c_max_incremental_search_retry_count = 10u;
+    static constexpr uint8 c_max_incremental_search_retry_count = 5u;
+
+    //
+    // Max retries count for logs writing attempts.
+    //
+    static constexpr uint8 c_max_logs_writing_attempts_retry_count = 10u;
 
     //
     // Lock for synchronizing access across threads.

@@ -20,10 +20,32 @@ namespace modula
 //
 enum class replication_action : uint8
 {
+
+    //
+    // File needs to be created.
+    //
     create = 0,
+
+    //
+    // File needs to be modified.
+    //
     update = 1,
+
+    //
+    // File needs to be removed.
+    //
     remove = 2,
-    full_sync = 3
+
+    //
+    // Full sync needs to be performed over the specified replication engines.
+    //
+    full_sync = 3,
+
+    //
+    // Invalid replication action.
+    //
+    invalid = 4
+    
 };
 
 //

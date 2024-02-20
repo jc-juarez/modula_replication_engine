@@ -54,8 +54,8 @@ int main(int argc, char** argv)
 
     if (status::failed(status))
     {
-        logger::log_error_fallback(std::format("<!> Modula replication engine startup failed. Status={:#X}.\n",
-            status).c_str());
+        logger::log(log_level::critical, std::format("<!> Modula replication engine startup failed. Status={:#X}.",
+            status));
 
         std::exit(EXIT_FAILURE);
     }
@@ -64,6 +64,8 @@ int main(int argc, char** argv)
     // Start the modula replication engine system upon successful initialization.
     //
     modula_replication_engine->start_engine();
+
+    logger::log(log_level::info, "Finishing modula replication engine execution.");
 
     std::exit(EXIT_SUCCESS);
 }

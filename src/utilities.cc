@@ -24,6 +24,13 @@ is_file_descriptor_valid(
     return p_file_descriptor != -1;
 }
 
+bool
+system_call_failed(
+    const int32 p_result)
+{
+    return p_result == -1;
+}
+
 status_code
 create_directory(
     const std::string& p_directory_name,
