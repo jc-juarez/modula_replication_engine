@@ -172,6 +172,8 @@ filesystem_monitor::~filesystem_monitor()
 void
 filesystem_monitor::start_kernel_events_offloader()
 {
+    std::vector<filesystem_event> offloading_filesystem_events_bucket;
+
     forever
     {
         //
@@ -258,22 +260,38 @@ filesystem_monitor::start_kernel_events_offloader()
                             }
                         }
 
+                        //
+                        // Valid event is found; append to the offloading bucket.
+                        //
                         if (event.m_replication_action != replication_action::invalid)
                         {
-                            //
-                            // Append recorded filesystem event to the events queue.
-                            //
-                            {
-                                std::scoped_lock<std::mutex> lock(m_filesystem_events_queue_lock);
-
-                                m_filesystem_events_queue.push(event);
-                            }
+                            offloading_filesystem_events_bucket.push_back(event);
                         }
                     }
                 }
                 
                 number_bytes_processed += sizeof(inotify_event) + inotify_filesystem_event->len;
             }
+        }
+
+        if (!offloading_filesystem_events_bucket.empty())
+        {
+            {
+                //
+                // Append recorded filesystem events to the events queue.
+                //
+                std::scoped_lock<std::mutex> lock(m_filesystem_events_queue_lock);
+
+                for (const filesystem_event& event : offloading_filesystem_events_bucket)
+                {
+                    m_filesystem_events_queue.push(event);
+                }
+            }
+            
+            //
+            // Cleanup the offloading bucket before starting to process new extractions.
+            //
+            offloading_filesystem_events_bucket.clear();
         }
     }
 }
