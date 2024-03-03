@@ -4,6 +4,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/modula.dir/src/logger.cc.o"
   "CMakeFiles/modula.dir/src/main.cc.o"
   "CMakeFiles/modula.dir/src/modula.cc.o"
+  "CMakeFiles/modula.dir/src/random_identifier_generator.cc.o"
   "CMakeFiles/modula.dir/src/replication_engine.cc.o"
   "CMakeFiles/modula.dir/src/replication_manager.cc.o"
   "CMakeFiles/modula.dir/src/replication_task.cc.o"

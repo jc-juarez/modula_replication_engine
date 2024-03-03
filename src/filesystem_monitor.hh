@@ -13,6 +13,7 @@
 #include "thread_pool.hh"
 #include "replication_task.hh"
 #include "replication_manager.hh"
+#include "random_identifier_generator.hh"
 
 #include <mutex>
 #include <string>
@@ -112,6 +113,11 @@ private:
     // Lock for synchronizing access to the filesystem events queue.
     //
     std::mutex m_filesystem_events_queue_lock;
+
+    //
+    // Random identifier generator for the replication tasks dispatcher.
+    //
+    random_identifier_generator m_random_identifier_generator;
 
     //
     // File descriptor handle for the epoll instance.

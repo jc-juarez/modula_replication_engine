@@ -33,23 +33,9 @@ public:
         status_code* p_status);
 
     //
-    // Determines whether a replication engine exists.
+    // Returns a non-mutable reference to the list of replication engines.
     //
-    bool
-    replication_engine_exists(
-        const std::string& p_directory_name);
-
-    //
-    // Returns a reference to a replication engine.
-    //
-    replication_engine&
-    get_replication_engine(
-        const std::string& p_directory_name);
-
-    //
-    // Returns a reference to the list of replication engines.
-    //
-    std::unordered_map<std::string, replication_engine>&
+    const std::vector<replication_engine>&
     get_replication_engines();
 
     //
@@ -57,6 +43,24 @@ public:
     //
     status_code
     execute_full_sync();
+
+    //
+    // Appends an entry to the replication engines router.
+    // Must be called only from the filesystem monitor side.
+    //
+    void
+    append_entry_to_replication_engines_router(
+        file_descriptor p_watch_descriptor,
+        uint32 p_replication_engine_index);
+
+    //
+    // Replication entry point for replication tasks. Resources
+    // ownership is transfered from the filesystem monitor to this method.
+    //
+    void
+    replication_tasks_entry_point(
+        file_descriptor p_watch_descriptor,
+        std::unique_ptr<replication_task>&& p_replication_task);
 
 private:
 
@@ -69,10 +73,14 @@ private:
         const std::string& p_configuration_file);
 
     //
-    // Container for holding replication engines. Static for the lifetime of the system.
+    // Container for holding replication engines.
     //
-    //std::unique_ptr<replication_engine[]> m_replication_engines;
-    std::unordered_map<std::string, replication_engine> m_replication_engines;
+    std::vector<replication_engine> m_replication_engines;
+
+    //
+    // Map router for replication engines. Maps a watch descriptor to the replication engine index.
+    //
+    std::unordered_map<file_descriptor, uint32> m_replication_engines_router;
 
     //
     // Thread pool for executing concurrent replication tasks by replication engines.

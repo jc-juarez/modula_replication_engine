@@ -6,7 +6,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "/home/jcjuarez/modula/build/modula",
-            "args": [],  // Optional: command line arguments to pass to your executable
+            "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

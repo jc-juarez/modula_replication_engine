@@ -27,10 +27,10 @@ public:
     directory() = default;
 
     //
-    // Constructor. Initializes directory class.
+    // Constructor. Initializes the directory class.
     //
     directory(
-        const std::string& p_name,
+        const std::string& p_path,
         const bool is_target_directory = false);
 
     //
@@ -46,10 +46,10 @@ public:
         const directory&& p_directory);
 
     //
-    // Returns the directory name.
+    // Returns the directory path.
     //
     std::string
-    get_name() const;
+    get_path() const;
 
     //
     // Checks if the directory is a subdirectory of another directory.
@@ -61,9 +61,9 @@ public:
 private:
 
     //
-    // Name of the directory.
+    // Path of the directory.
     //
-    std::string m_name;
+    std::string m_path;
     
 };
 

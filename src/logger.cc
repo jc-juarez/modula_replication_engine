@@ -24,9 +24,9 @@ logger::logger(
     status_code* p_status,
     std::string* p_initial_message,
     const logger_configuration* p_logger_configuration)
-    : m_random_number_distribution(0, std::numeric_limits<uint64>::max()),
-      m_logs_files_count(0),
-      m_process_id(getpid())
+    : m_logs_files_count(0),
+      m_process_id(getpid()),
+      m_random_identifier_generator()
 {
     //
     // The logger is agnostic to the default configurations given by the
@@ -45,18 +45,6 @@ logger::logger(
     const std::filesystem::path logs_directory_path = std::filesystem::absolute(p_logger_configuration->m_logs_directory_path);
 
     //
-    // Initialize the random number generator.
-    //
-    try
-    {
-        m_random_number_generator.seed(std::random_device{}());
-    }
-    catch (const std::exception& exception)
-    {
-        m_random_number_generator.seed(static_cast<uint32>(std::time(nullptr)));
-    }
-
-    //
     // Set the session ID after the random number generator has been
     // initialized and ensure that the session ID does not already exist.
     //
@@ -65,7 +53,7 @@ logger::logger(
 
     do
     {
-        session_id = generate_unique_identifier();
+        session_id = m_random_identifier_generator.generate_double_random_identifier();
         session_logs_directory_path = logs_directory_path;
         session_logs_directory_path.append(c_session_logs_directory_prefix + session_id);
     }
@@ -193,21 +181,6 @@ logger::log_message(
                 formatted_log_message.c_str()).c_str()); 
         }
     }
-}
-
-std::string
-logger::generate_unique_identifier()
-{
-    return std::format(
-        "{}-{}",
-        generate_random_number(),
-        generate_random_number());
-}
-
-uint64
-logger::generate_random_number()
-{
-    return m_random_number_distribution(m_random_number_generator);
 }
 
 std::string

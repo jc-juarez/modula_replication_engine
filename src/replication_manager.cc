@@ -27,6 +27,7 @@ replication_manager::replication_manager(
         return;
     }
 
+    // NOTE: This has to be taken out from here and moved to the initialization segment after the initialization of the filesystem monitor.
     //
     // Initiate an initial full sync on all directories on startup.
     //
@@ -56,30 +57,14 @@ replication_manager::replication_manager(
         return;
     }
 
-    for (std::pair<const std::string, replication_engine>& replication_engine_entry : m_replication_engines)
+    for (replication_engine& replication_engine : m_replication_engines)
     {
-        replication_engine& replication_engine = replication_engine_entry.second;
-
         replication_engine.attach_replication_tasks_thread_pool(
             m_replication_tasks_thread_pool);
     }
 }
 
-bool
-replication_manager::replication_engine_exists(
-    const std::string& p_directory_name)
-{
-    return m_replication_engines.count(p_directory_name);
-}
-
-replication_engine&
-replication_manager::get_replication_engine(
-    const std::string& p_directory_name)
-{
-    return m_replication_engines[p_directory_name];
-}
-
-std::unordered_map<std::string, replication_engine>&
+const std::vector<replication_engine>&
 replication_manager::get_replication_engines()
 {
     return m_replication_engines;
@@ -90,17 +75,14 @@ replication_manager::execute_full_sync()
 {
     status_code status = status::success;
 
-    for (std::pair<const std::string, replication_engine>& replication_engine_entry : m_replication_engines)
+    for (replication_engine& replication_engine : m_replication_engines)
     {
-        const std::string& replication_engine_name = replication_engine_entry.first;
-        replication_engine& replication_engine = replication_engine_entry.second;
-
         status = replication_engine.execute_full_sync();
 
         if (status::failed(status))
         {
             logger::log(log_level::error, std::format("Full sync for directory '{}' failed. Status={:#X}.",
-                replication_engine_name,
+                replication_engine.get_source_directory_path(),
                 status));
 
             return status;
@@ -108,6 +90,16 @@ replication_manager::execute_full_sync()
     }
 
     return status;
+}
+
+void
+replication_manager::append_entry_to_replication_engines_router(
+    file_descriptor p_watch_descriptor,
+    uint32 p_replication_engine_index)
+{
+    m_replication_engines_router.emplace(
+        p_watch_descriptor,
+        p_replication_engine_index);
 }
 
 status_code
@@ -125,9 +117,25 @@ replication_manager::parse_initial_configuration_file_into_memory(
         std::move(target_directories));
 
     // Create move constuctor for replication engine as well.
-    m_replication_engines.emplace(replication_engine.get_name(), std::move(replication_engine));
+    m_replication_engines.emplace_back(std::move(replication_engine));
 
     return status::success;
+}
+
+void
+replication_manager::replication_tasks_entry_point(
+    file_descriptor p_watch_descriptor,
+    std::unique_ptr<replication_task>&& p_replication_task)
+{
+    logger::log(log_level::info, std::format("Received replication task to process. FilesystemObjectName={}, ReplicationAction={}, WatchDescriptor={}, CreationTime={}.",
+        p_replication_task->get_filesystem_object_name(),
+        static_cast<uint8>(p_replication_task->get_replication_action()),
+        p_watch_descriptor,
+        p_replication_task->get_creation_time().to_string()));
+
+    //
+    // Routing and validations.
+    //
 }
 
 } // namespace modula.

@@ -63,10 +63,10 @@ public:
         std::unique_ptr<replication_task>&& p_replication_task);
 
     //
-    // Returns the name of the replication engine, which is the directory name.
+    // Returns the path for the source directory of the replication engine.
     //
     std::string
-    get_name() const;
+    get_source_directory_path() const;
 
 private:
 

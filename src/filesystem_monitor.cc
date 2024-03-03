@@ -31,7 +31,8 @@ filesystem_monitor::filesystem_monitor(
     std::shared_ptr<replication_manager> p_replication_manager,
     status_code* p_status) :
     m_termination_signals_handle(p_termination_signals_handle),
-    m_replication_manager(p_replication_manager)
+    m_replication_manager(p_replication_manager),
+    m_random_identifier_generator()
 {
     //
     // Start the inotify instance in non-blocking mode.
@@ -51,16 +52,19 @@ filesystem_monitor::filesystem_monitor(
     //
     // Start all watch descriptors for the specified directories.
     //
-    for (std::pair<const std::string, replication_engine>& replication_engine_entry : m_replication_manager->get_replication_engines())
-    {
-        const std::string& replication_engine_name = replication_engine_entry.first;
+    const std::vector<replication_engine>& replication_engines = m_replication_manager->get_replication_engines();
+    const uint32 replication_engines_container_size = replication_engines.size();
 
-        if (!std::filesystem::exists(replication_engine_name))
+    for (uint32 replication_engine_index = 0; replication_engine_index < replication_engines_container_size; ++replication_engine_index)
+    {
+        const std::string& replication_engine_source_directory_path = replication_engines[replication_engine_index].get_source_directory_path();
+
+        if (!std::filesystem::exists(replication_engine_source_directory_path))
         {
             *p_status = status::directory_does_not_exist;
 
             logger::log(log_level::critical, std::format("Directory '{}' does not exist. Status={:#X}.",
-                replication_engine_name.c_str(),
+                replication_engine_source_directory_path.c_str(),
                 *p_status));
 
             return;
@@ -68,7 +72,7 @@ filesystem_monitor::filesystem_monitor(
 
         file_descriptor directory_watch_descriptor = inotify_add_watch(
             m_inotify_handle,
-            replication_engine_name.c_str(),
+            replication_engine_source_directory_path.c_str(),
             IN_CREATE | IN_MODIFY | IN_DELETE);
     
         if (!utilities::is_file_descriptor_valid(directory_watch_descriptor))
@@ -76,13 +80,20 @@ filesystem_monitor::filesystem_monitor(
             *p_status = status::directory_watch_descriptor_creation_failed;
 
             logger::log(log_level::critical, std::format("Watch descriptor for directory '{}' could not be created. Status={:#X}.",
-                replication_engine_name.c_str(),
+                replication_engine_source_directory_path.c_str(),
                 *p_status));
 
             return;
         }
 
         m_watch_descriptors.emplace_back(directory_watch_descriptor);
+
+        //
+        // Apppend entry for cross-reference routing across components.
+        //
+        m_replication_manager->append_entry_to_replication_engines_router(
+            directory_watch_descriptor,
+            replication_engine_index);
     }
 
     //
@@ -369,6 +380,7 @@ filesystem_monitor::replication_tasks_dispatcher()
         while (!filesystem_events_batching_queue.empty())
         {
             const filesystem_event& current_filesystem_event = filesystem_events_batching_queue.front();
+            const file_descriptor watch_descriptor = current_filesystem_event.m_watch_descriptor;
 
             std::unique_ptr<replication_task> current_replication_task = std::make_unique<replication_task>(
                 current_filesystem_event.m_replication_action,
@@ -376,10 +388,37 @@ filesystem_monitor::replication_tasks_dispatcher()
 
             filesystem_events_batching_queue.pop();
 
-            logger::log(log_level::info, std::format("Created replication task. FilesystemObjectName={}, ReplicationAction={}, CreationTime={}.",
+            //
+            // Generate an identifier for the replication task and attach it to the current thread.
+            //
+            //std::string 
+
+            logger::log(log_level::info, std::format("Created replication task. FilesystemObjectName={}, ReplicationAction={}, WatchDescriptor={}, CreationTime={}.",
                 current_replication_task->get_filesystem_object_name(),
                 static_cast<uint8>(current_replication_task->get_replication_action()),
+                watch_descriptor,
                 current_replication_task->get_creation_time().to_string()));
+
+            //
+            // Enqueue the replication task in the thread pool for asynchronous execution and ownership transfer.
+            //
+            std::optional<std::future<void>> enqueue_status = m_dispatcher_thread_pool->enqueue_task(
+                [this, watch_descriptor, replication_task = std::move(current_replication_task)]() mutable
+                {
+                    this->m_replication_manager->replication_tasks_entry_point(
+                        watch_descriptor,
+                        std::move(replication_task));
+                }
+            );
+
+            if (enqueue_status == std::nullopt)
+            {
+                logger::log(log_level::warning, std::format("Replication tasks dispatcher thread pool blocked replication task enqueue process.",
+                    current_replication_task->get_filesystem_object_name(),
+                    static_cast<uint8>(current_replication_task->get_replication_action()),
+                    watch_descriptor,
+                    current_replication_task->get_creation_time().to_string()));
+            }
         }
 
         //

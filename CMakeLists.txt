@@ -26,6 +26,7 @@ set(SOURCE_FILES
     src/replication_engine.cc
     src/replication_manager.cc
     src/system_configuration.cc
-    src/timestamp.cc)
+    src/timestamp.cc
+    src/random_identifier_generator)
 
 add_executable(modula ${SOURCE_FILES})

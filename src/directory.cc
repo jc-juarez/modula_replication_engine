@@ -14,31 +14,31 @@ namespace modula
 {
 
 directory::directory(
-    const std::string& p_name,
+    const std::string& p_path,
     const bool is_target_directory) :
-    m_name(p_name)
+    m_path(p_path)
 {
     if (is_target_directory &&
-        !std::filesystem::exists(p_name))
+        !std::filesystem::exists(p_path))
     {
-        utilities::create_directory(p_name);
+        utilities::create_directory(p_path);
     }
 }
 
 directory::directory(
     const directory& p_directory) :
-    m_name(p_directory.m_name)
+    m_path(p_directory.m_path)
 {}
 
 directory::directory(
     const directory&& p_directory) :
-    m_name(std::move(p_directory.m_name))
+    m_path(std::move(p_directory.m_path))
 {}
 
 std::string
-directory::get_name() const
+directory::get_path() const
 {
-    return m_name;
+    return m_path;
 }
 
 bool
@@ -48,7 +48,7 @@ directory::is_subdirectory_of(
     //
     // Resolve symbolic links or other possible relative paths.
     //
-    std::filesystem::path canonical_subdirectory = std::filesystem::canonical(m_name);
+    std::filesystem::path canonical_subdirectory = std::filesystem::canonical(m_path);
     std::filesystem::path canonical_comparing_directory = std::filesystem::canonical(p_comparing_directory);
 
     std::filesystem::path::iterator canonical_subdirectory_iterator = canonical_subdirectory.begin();
@@ -75,4 +75,4 @@ directory::is_subdirectory_of(
     return canonical_comparing_directory_iterator == canonical_comparing_directory.end();
 }
 
-} // namespace modula.
+} // pathspace modula.

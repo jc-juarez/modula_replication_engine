@@ -47,9 +47,9 @@ replication_engine::execute_replication_task(
 }
 
 std::string
-replication_engine::get_name() const
+replication_engine::get_source_directory_path() const
 {
-    return m_source_directory.get_name();
+    return m_source_directory.get_path();
 }
 
 } // namespace modula.

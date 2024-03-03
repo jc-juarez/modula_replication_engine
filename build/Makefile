@@ -258,6 +258,33 @@ src/modula.cc.s:
 	$(MAKE) -f CMakeFiles/modula.dir/build.make CMakeFiles/modula.dir/src/modula.cc.s
 .PHONY : src/modula.cc.s
 
+src/random_identifier_generator.o: src/random_identifier_generator.cc.o
+
+.PHONY : src/random_identifier_generator.o
+
+# target to build an object file
+src/random_identifier_generator.cc.o:
+	$(MAKE) -f CMakeFiles/modula.dir/build.make CMakeFiles/modula.dir/src/random_identifier_generator.cc.o
+.PHONY : src/random_identifier_generator.cc.o
+
+src/random_identifier_generator.i: src/random_identifier_generator.cc.i
+
+.PHONY : src/random_identifier_generator.i
+
+# target to preprocess a source file
+src/random_identifier_generator.cc.i:
+	$(MAKE) -f CMakeFiles/modula.dir/build.make CMakeFiles/modula.dir/src/random_identifier_generator.cc.i
+.PHONY : src/random_identifier_generator.cc.i
+
+src/random_identifier_generator.s: src/random_identifier_generator.cc.s
+
+.PHONY : src/random_identifier_generator.s
+
+# target to generate assembly for a file
+src/random_identifier_generator.cc.s:
+	$(MAKE) -f CMakeFiles/modula.dir/build.make CMakeFiles/modula.dir/src/random_identifier_generator.cc.s
+.PHONY : src/random_identifier_generator.cc.s
+
 src/replication_engine.o: src/replication_engine.cc.o
 
 .PHONY : src/replication_engine.o
@@ -471,6 +498,9 @@ help:
 	@echo "... src/modula.o"
 	@echo "... src/modula.i"
 	@echo "... src/modula.s"
+	@echo "... src/random_identifier_generator.o"
+	@echo "... src/random_identifier_generator.i"
+	@echo "... src/random_identifier_generator.s"
 	@echo "... src/replication_engine.o"
 	@echo "... src/replication_engine.i"
 	@echo "... src/replication_engine.s"

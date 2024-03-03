@@ -7,6 +7,7 @@
 
 #include "status.hh"
 #include "utilities.hh"
+#include "random_identifier_generator.hh"
 
 #include <mutex>
 #include <random>
@@ -108,18 +109,6 @@ private:
     log_message(
         const log_level& p_log_level,
         const character* p_message);
-
-    //
-    // Generates a random <8 bytes>-<8 bytes> unique identifier. 
-    //
-    std::string
-    generate_unique_identifier();
-
-    //
-    // Generates a random 8 bytes number.
-    //
-    uint64
-    generate_random_number();
 
     //
     // Constructs the log message with formatting.
@@ -232,14 +221,9 @@ private:
     std::mutex m_lock;
 
     //
-    // Random number generator for unique identifiers.
+    // Random identifier generator for logging purposes.
     //
-    std::mt19937 m_random_number_generator;
-
-    //
-    // Distribution for random numbers generation.
-    //
-    std::uniform_int_distribution<uint64> m_random_number_distribution;
+    random_identifier_generator m_random_identifier_generator; 
 
     //
     // Flag for determining whether debug mode is enabled.
