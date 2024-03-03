@@ -26,8 +26,8 @@ namespace modula
 {
 
 //
-// Filesystem event interface for deep copies of inotify events needed
-// for copying from the internal kernel queue to the user-space queue.
+// Lightweight filesystem event interface for deep copies of inotify events
+// needed for copying from the internal kernel queue to the user-space queue.
 //
 struct filesystem_event
 {
@@ -38,14 +38,19 @@ struct filesystem_event
     filesystem_event();
 
     //
+    // Watch descriptor for the directory associated with the filesystem object to replicate.
+    //
+    file_descriptor m_watch_descriptor;
+
+    //
     // Replication action to be performed.
     //
     replication_action m_replication_action;
 
     //
-    // Dynamic-size name field of the event.
+    // Dynamic-size name field for the filesystem object of the event.
     //
-    std::string m_name;
+    std::string m_filesystem_object_name;
 
 };
 

@@ -23,7 +23,7 @@ namespace modula
 
 filesystem_event::filesystem_event()
     : m_replication_action(replication_action::invalid),
-      m_name("")
+      m_filesystem_object_name("")
 {}
 
 filesystem_monitor::filesystem_monitor(
@@ -266,10 +266,12 @@ filesystem_monitor::start_kernel_events_offloader()
                 {
                     filesystem_event event;
 
-                    event.m_name = inotify_filesystem_event->name;
+                    event.m_filesystem_object_name = inotify_filesystem_event->name;
 
-                    if (!event.m_name.empty())
+                    if (!event.m_filesystem_object_name.empty())
                     {
+                        event.m_watch_descriptor = inotify_filesystem_event->wd;
+
                         //
                         // Logging is handled by the replication tasks dispatcher.
                         //
@@ -295,11 +297,11 @@ filesystem_monitor::start_kernel_events_offloader()
                             }
                         }
 
-                        //
-                        // Valid event is found; append to the offloading bucket.
-                        //
                         if (event.m_replication_action != replication_action::invalid)
                         {
+                            //
+                            // Valid event to process is found; append it to the offloading bucket.
+                            //
                             offloading_filesystem_events_bucket.push_back(event);
                         }
                     }
@@ -366,11 +368,18 @@ filesystem_monitor::replication_tasks_dispatcher()
 
         while (!filesystem_events_batching_queue.empty())
         {
-            logger::log(log_level::info, std::format("Processing replication. Name={}, ReplicationAction={}.",
-                filesystem_events_batching_queue.front().m_name,
-                static_cast<uint8>(filesystem_events_batching_queue.front().m_replication_action)));
+            const filesystem_event& current_filesystem_event = filesystem_events_batching_queue.front();
+
+            std::unique_ptr<replication_task> current_replication_task = std::make_unique<replication_task>(
+                current_filesystem_event.m_replication_action,
+                current_filesystem_event.m_filesystem_object_name);
 
             filesystem_events_batching_queue.pop();
+
+            logger::log(log_level::info, std::format("Created replication task. FilesystemObjectName={}, ReplicationAction={}, CreationTime={}.",
+                current_replication_task->get_filesystem_object_name(),
+                static_cast<uint8>(current_replication_task->get_replication_action()),
+                current_replication_task->get_creation_time().to_string()));
         }
 
         //

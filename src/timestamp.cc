@@ -14,9 +14,12 @@
 namespace modula
 {
 
-timestamp::timestamp()
-    : m_time_point(std::chrono::system_clock::now())
-{}
+timestamp::timestamp(
+    const bool p_invalid_timestamp)
+{
+    m_time_point = p_invalid_timestamp ? std::chrono::time_point<std::chrono::system_clock>::min() :
+        m_time_point = std::chrono::system_clock::now();
+}
 
 timestamp::timestamp(
     const timestamp& p_timestamp)
@@ -46,7 +49,13 @@ timestamp::to_string()
 timestamp
 timestamp::get_current_time()
 {
-    return timestamp();
+    return timestamp(false /* Valid timestamp. */);
+}
+
+timestamp
+timestamp::generate_invalid_timestamp()
+{
+    return timestamp(true /* Invalid timestamp. */);
 }
 
 } // namespace modula.

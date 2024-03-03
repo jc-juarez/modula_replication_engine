@@ -290,10 +290,10 @@ logger::log_to_file(
         // If the file exists ensure that it has not exceeded the size limit; if it 
         // has, rollover the logs file count and switch the currently pointed logs file.
         //
-        for (uint16 logs_writing_attempts_retry_count = 1; logs_writing_attempts_retry_count <= c_max_logs_writing_attempts_retry_count; ++logs_writing_attempts_retry_count)
+        if (!std::filesystem::exists(m_current_logs_file_path) ||
+            utilities::get_file_size(m_current_logs_file_path.string()) < c_max_logs_file_size_mib)
         {
-            if (!std::filesystem::exists(m_current_logs_file_path) ||
-                utilities::get_file_size(m_current_logs_file_path.string()) < c_max_logs_file_size_mib)
+            for (uint16 logs_writing_attempts_retry_count = 1; logs_writing_attempts_retry_count <= c_max_logs_writing_attempts_retry_count; ++logs_writing_attempts_retry_count)
             {
                 status = utilities::append_content_to_file(
                     m_current_logs_file_path,

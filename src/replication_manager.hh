@@ -69,8 +69,9 @@ private:
         const std::string& p_configuration_file);
 
     //
-    // Container for holding replication engines.
+    // Container for holding replication engines. Static for the lifetime of the system.
     //
+    //std::unique_ptr<replication_engine[]> m_replication_engines;
     std::unordered_map<std::string, replication_engine> m_replication_engines;
 
     //

@@ -56,13 +56,6 @@ public:
     execute_full_sync();
 
     //
-    // Enqueues a replication task into the queue for execution.
-    //
-    status_code
-    enqueue_replication_task(
-        std::unique_ptr<replication_task>&& p_replication_task);
-
-    //
     // Executes a replication task.
     //
     status_code
@@ -78,11 +71,6 @@ public:
 private:
 
     //
-    // Directory-level queue of replication tasks for execution.
-    //
-    std::queue<std::unique_ptr<replication_task>> m_replication_tasks;
-
-    //
     // Thread pool for handling concurrent directory replication.
     // This is shared among all replication engines in the system.
     //
@@ -90,7 +78,7 @@ private:
 
     //
     // Directory component of the replication engine.
-    // Replication engines are uniquely identified by their source directory names.
+    // Replication engines are uniquely identified by their source directory name.
     //
     directory m_source_directory;
 

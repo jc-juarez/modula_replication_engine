@@ -27,7 +27,8 @@ private:
     // Private default constructor for the timestamp class.
     // Only used internally for assigning an initial time value.
     //
-    timestamp();
+    timestamp(
+        const bool p_invalid_timestamp);
 
 public:
 
@@ -49,6 +50,13 @@ public:
     static
     timestamp
     get_current_time();
+
+    //
+    // Generates an invalid timestamp.
+    //
+    static
+    timestamp
+    generate_invalid_timestamp();
 
 private:
 

@@ -9,8 +9,10 @@
 #define REPLICATION_TASK_
 
 #include "utilities.hh"
+#include "timestamp.hh"
 
 #include <string>
+#include <memory>
 
 namespace modula
 {
@@ -60,14 +62,26 @@ public:
     // Constructor. Initializes a replication task.
     //
     replication_task(
-        replication_action p_replication_action,
-        const std::string& p_file_name);
+        const replication_action p_replication_action,
+        const std::string& p_filesystem_object_name);
 
+    //
+    // Gets the replication action of the replication task.
+    //
     replication_action
     get_replication_action() const;
 
-    std::string
-    get_file_name() const;
+    //
+    // Gets the filesystem object name.
+    //
+    const character*
+    get_filesystem_object_name() const;
+
+    //
+    // Gets the creation time of the replication task.
+    //
+    timestamp
+    get_creation_time() const;
 
 private:
 
@@ -77,9 +91,19 @@ private:
     replication_action m_replication_action;
 
     //
-    // Name of the file tied to the task.
+    // Name of the filesystem object tied to the task.
     //
-    std::string m_file_name;
+    std::string m_filesystem_object_name;
+
+    //
+    // Timestamp for the creation of the replication task.
+    //
+    timestamp m_creation_timestamp;
+
+    //
+    // Timestamp for the end of the replication task.
+    //
+    timestamp m_end_timestamp;
     
 };
 
