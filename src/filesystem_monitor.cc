@@ -391,7 +391,8 @@ filesystem_monitor::replication_tasks_dispatcher()
             //
             // Generate an identifier for the replication task and attach it to the current thread.
             //
-            //std::string 
+            const std::string activity_id = m_random_identifier_generator.generate_triple_random_identifier();
+            logger::set_activity_id(activity_id); 
 
             logger::log(log_level::info, std::format("Created replication task. FilesystemObjectName={}, ReplicationAction={}, WatchDescriptor={}, CreationTime={}.",
                 current_replication_task->get_filesystem_object_name(),
@@ -403,9 +404,10 @@ filesystem_monitor::replication_tasks_dispatcher()
             // Enqueue the replication task in the thread pool for asynchronous execution and ownership transfer.
             //
             std::optional<std::future<void>> enqueue_status = m_dispatcher_thread_pool->enqueue_task(
-                [this, watch_descriptor, replication_task = std::move(current_replication_task)]() mutable
+                [this, activity_id, watch_descriptor, replication_task = std::move(current_replication_task)]() mutable
                 {
                     this->m_replication_manager->replication_tasks_entry_point(
+                        activity_id,
                         watch_descriptor,
                         std::move(replication_task));
                 }
@@ -413,11 +415,8 @@ filesystem_monitor::replication_tasks_dispatcher()
 
             if (enqueue_status == std::nullopt)
             {
-                logger::log(log_level::warning, std::format("Replication tasks dispatcher thread pool blocked replication task enqueue process.",
-                    current_replication_task->get_filesystem_object_name(),
-                    static_cast<uint8>(current_replication_task->get_replication_action()),
-                    watch_descriptor,
-                    current_replication_task->get_creation_time().to_string()));
+                logger::log(log_level::warning, std::format("Replication tasks dispatcher thread pool blocked replication task enqueue process. FilesystemObjectName={}.",
+                    current_replication_task->get_filesystem_object_name()));
             }
         }
 
@@ -427,6 +426,8 @@ filesystem_monitor::replication_tasks_dispatcher()
         //
         std::this_thread::sleep_for(std::chrono::milliseconds(c_replication_tasks_dispatcher_polling_sleep_ms));
     }
+
+    logger::reset_activity_id();
 
     logger::log(log_level::info, "Finishing replication tasks dispatcher thread.");
 }

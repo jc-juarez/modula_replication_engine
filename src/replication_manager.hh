@@ -59,6 +59,7 @@ public:
     //
     void
     replication_tasks_entry_point(
+        const std::string& p_activity_id,
         file_descriptor p_watch_descriptor,
         std::unique_ptr<replication_task>&& p_replication_task);
 

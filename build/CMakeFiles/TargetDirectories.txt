@@ -1,3 +1,0 @@
-/home/jcjuarez/modula/build/CMakeFiles/rebuild_cache.dir
-/home/jcjuarez/modula/build/CMakeFiles/edit_cache.dir
-/home/jcjuarez/modula/build/CMakeFiles/modula.dir

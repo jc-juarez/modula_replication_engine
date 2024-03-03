@@ -124,14 +124,14 @@ replication_manager::parse_initial_configuration_file_into_memory(
 
 void
 replication_manager::replication_tasks_entry_point(
+    const std::string& p_activity_id,
     file_descriptor p_watch_descriptor,
     std::unique_ptr<replication_task>&& p_replication_task)
 {
-    logger::log(log_level::info, std::format("Received replication task to process. FilesystemObjectName={}, ReplicationAction={}, WatchDescriptor={}, CreationTime={}.",
-        p_replication_task->get_filesystem_object_name(),
-        static_cast<uint8>(p_replication_task->get_replication_action()),
-        p_watch_descriptor,
-        p_replication_task->get_creation_time().to_string()));
+    logger::set_activity_id(p_activity_id);
+
+    logger::log(log_level::info, std::format("Received replication task to process. FilesystemObjectName={}.",
+        p_replication_task->get_filesystem_object_name()));
 
     //
     // Routing and validations.

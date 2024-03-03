@@ -18,6 +18,8 @@
 namespace modula
 {
 
+thread_local std::string g_activity_id = logger::c_default_activity_id;
+
 bool logger::s_initialized = false;
 
 logger::logger(
@@ -152,6 +154,19 @@ logger::log_error_fallback(
 }
 
 void
+logger::set_activity_id(
+    const std::string& p_activity_id)
+{
+    g_activity_id = p_activity_id;
+}
+
+void
+logger::reset_activity_id()
+{
+    g_activity_id = c_default_activity_id;
+}
+
+void
 logger::log_message(
     const log_level& p_log_level,
     const character* p_message)
@@ -225,11 +240,12 @@ logger::create_formatted_log_message(
     }
 
     return std::format(
-        "[{}] ({}) PID={}, TID={}. <{}> {}\n",
+        "[{}] ({}) PID={}, TID={}, ActivityID={}. <{}> {}\n",
         timestamp::get_current_time().to_string().c_str(),
         m_session_id.c_str(),
         m_process_id,
         syscall(SYS_gettid),
+        g_activity_id,
         level,
         p_message);
 }

@@ -100,6 +100,26 @@ public:
     log_error_fallback(
         const character* p_message);
 
+    //
+    // Sets the activity id for the current thread.
+    //
+    static
+    void
+    set_activity_id(
+        const std::string& p_activity_id);
+
+    //
+    // Resets the activity id back to the default value.
+    //
+    static
+    void
+    reset_activity_id();
+
+    //
+    // Default activity id value.
+    //
+    static constexpr const character* c_default_activity_id = "0";
+
 private:
 
     //

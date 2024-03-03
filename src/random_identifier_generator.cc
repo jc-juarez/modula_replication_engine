@@ -46,6 +46,8 @@ random_identifier_generator::generate_triple_random_identifier()
 uint64
 random_identifier_generator::generate_random_number()
 {
+    std::scoped_lock<std::mutex> lock(m_lock);
+    
     return m_random_number_distribution(m_random_number_generator);
 }
 
