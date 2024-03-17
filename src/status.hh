@@ -165,6 +165,21 @@ public:
     //
     static constexpr status_code epoll_startup_failed = 0x8'0000016;
 
+    //
+    // Watch descriptor is not present in the replication engines router.
+    //
+    static constexpr status_code unknown_watch_descriptor = 0x8'0000017;
+
+    //
+    // The specified filesystem object does not exist.
+    //
+    static constexpr status_code filesystem_object_does_not_exist = 0x8'0000018;
+
+    //
+    // Failure to enqueue a task into a thread pool.
+    //
+    static constexpr status_code thread_pool_enqueue_process_failed = 0x8'0000019;
+
 };
 
 } // namespace modula.

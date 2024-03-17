@@ -223,6 +223,11 @@ filesystem_monitor::start_kernel_events_offloader()
     forever
     {
         //
+        // Reset errno for correct error handling.
+        //
+        errno = 0;
+
+        //
         // Offload the filesystem inotify events from the internal
         // kernel queue onto a user-space managed dynamic size queue.
         //
@@ -234,9 +239,31 @@ filesystem_monitor::start_kernel_events_offloader()
             c_epoll_event_buffer_size,
             -1 /* No timeout for the epoll events. */);
 
+        if (errno == EAGAIN)
+        {
+            //
+            // The epoll instance woke up without data to process; ignore.
+            //
+            continue;
+        }
+
         for (uint16 epoll_event_index = 0; epoll_event_index < number_epoll_events; ++epoll_event_index)
         {
+            //
+            // Reset errno for correct error handling.
+            //
+            errno = 0;
+
             epoll_event event = epoll_events[epoll_event_index];
+
+            if (!(event.data.fd == m_inotify_handle ||
+                event.data.fd == m_termination_signals_handle))
+            {
+                //
+                // Irrelevant file descriptor to the system; ignore.
+                //
+                continue;
+            }
 
             if (event.data.fd == m_termination_signals_handle)
             {
@@ -251,12 +278,20 @@ filesystem_monitor::start_kernel_events_offloader()
             //
             // Read event buffer of the inotify instance.
             //
-            static byte read_event_buffer[c_read_event_buffer_size] __attribute__ ((aligned(__alignof__(inotify_event))));
+            byte read_event_buffer[c_read_event_buffer_size] __attribute__ ((aligned(__alignof__(inotify_event))));
 
             uint32 number_bytes_read = read(
                 m_inotify_handle,
                 read_event_buffer,
                 c_read_event_buffer_size);
+
+            if (errno == EAGAIN)
+            {
+                //
+                // The inotify instance has no current data to process; ignore.
+                //
+                continue;
+            }
 
             if (number_bytes_read <= 0)
             {
@@ -415,8 +450,9 @@ filesystem_monitor::replication_tasks_dispatcher()
 
             if (enqueue_status == std::nullopt)
             {
-                logger::log(log_level::warning, std::format("Replication tasks dispatcher thread pool blocked replication task enqueue process. FilesystemObjectName={}.",
-                    current_replication_task->get_filesystem_object_name()));
+                logger::log(log_level::warning, std::format("Replication tasks dispatcher thread pool blocked replication task enqueue process. "
+                    "Status={:#X}.",
+                    status::thread_pool_enqueue_process_failed));
             }
         }
 

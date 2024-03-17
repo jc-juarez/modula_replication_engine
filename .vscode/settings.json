@@ -66,6 +66,7 @@
         "format": "cpp",
         "semaphore": "cpp",
         "unordered_set": "cpp",
-        "csignal": "cpp"
+        "csignal": "cpp",
+        "map": "cpp"
     }
 }

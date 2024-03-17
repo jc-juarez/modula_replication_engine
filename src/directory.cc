@@ -35,7 +35,7 @@ directory::directory(
     m_path(std::move(p_directory.m_path))
 {}
 
-std::string
+const std::string&
 directory::get_path() const
 {
     return m_path;

@@ -60,21 +60,42 @@ public:
     //
     status_code
     execute_replication_task(
-        std::unique_ptr<replication_task>&& p_replication_task);
+        std::unique_ptr<replication_task>& p_replication_task);
 
     //
     // Returns the path for the source directory of the replication engine.
     //
-    std::string
+    const std::string&
     get_source_directory_path() const;
 
 private:
+
+    //
+    // Distributes the replication task into sub-tasks across
+    // the replication tasks thread pool for parallel execution.
+    //
+    status_code
+    enqueue_distributed_replication_tasks(
+        std::unique_ptr<replication_task>& p_replication_task);
+
+    //
+    // Replicates a filesystem object to a target directory.
+    //
+    status_code
+    replicate_filesystem_object(
+        const character* p_target_directory_path,
+        std::unique_ptr<replication_task>& p_replication_task);
 
     //
     // Thread pool for handling concurrent directory replication.
     // This is shared among all replication engines in the system.
     //
     std::shared_ptr<thread_pool> m_replication_tasks_thread_pool;
+
+    //
+    // Lock for synchronizing replication tasks for each replication engine.
+    //
+    std::mutex m_replication_engine_lock;
 
     //
     // Directory component of the replication engine.

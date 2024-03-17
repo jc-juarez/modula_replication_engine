@@ -90,12 +90,17 @@ std::tuple<status_code, file_descriptor>
 modula::create_termination_signals_handle()
 {
     status_code status = status::success;
-    sigset_t termination_signals_mask;
-    sigemptyset(&termination_signals_mask);
+
+    //
+    // The systemm must ignore children signaling coming from process forking.
+    //
+    signal(SIGCHLD, SIG_IGN);
 
     //
     // The system handles 'Ctrl-C' and 'kill' commands by itself.
     //
+    sigset_t termination_signals_mask;
+    sigemptyset(&termination_signals_mask);
     sigaddset(&termination_signals_mask, SIGINT);
     sigaddset(&termination_signals_mask, SIGTERM);
 

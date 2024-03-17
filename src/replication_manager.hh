@@ -74,6 +74,14 @@ private:
         const std::string& p_configuration_file);
 
     //
+    // Sends a replication task to its corresponding replication engine for execution.
+    //
+    status_code
+    send_replication_task(
+        file_descriptor p_watch_descriptor,
+        std::unique_ptr<replication_task>& p_replication_task);
+
+    //
     // Container for holding replication engines.
     //
     std::vector<replication_engine> m_replication_engines;

@@ -16,7 +16,9 @@ replication_task::replication_task(
     m_replication_action(p_replication_action),
     m_filesystem_object_name(p_filesystem_object_name),
     m_creation_timestamp(timestamp::get_current_time()),
-    m_end_timestamp(timestamp::generate_invalid_timestamp())
+    m_end_timestamp(timestamp::generate_invalid_timestamp()),
+    m_last_error_timestamp(timestamp::generate_invalid_timestamp()),
+    m_filesystem_object_path("")
 {}
 
 replication_action

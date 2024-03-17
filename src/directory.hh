@@ -48,7 +48,7 @@ public:
     //
     // Returns the directory path.
     //
-    std::string
+    const std::string&
     get_path() const;
 
     //

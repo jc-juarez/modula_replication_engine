@@ -83,6 +83,21 @@ public:
     timestamp
     get_creation_time() const;
 
+    //
+    // Timestamp for the end of the replication task.
+    //
+    timestamp m_end_timestamp;
+
+    //
+    // Timestamp for last encountered error.
+    //
+    timestamp m_last_error_timestamp;
+
+    //
+    // Filesystem object to replicate path.
+    //
+    std::string m_filesystem_object_path;
+
 private:
 
     //
@@ -99,11 +114,6 @@ private:
     // Timestamp for the creation of the replication task.
     //
     timestamp m_creation_timestamp;
-
-    //
-    // Timestamp for the end of the replication task.
-    //
-    timestamp m_end_timestamp;
     
 };
 
