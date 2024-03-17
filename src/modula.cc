@@ -92,11 +92,6 @@ modula::create_termination_signals_handle()
     status_code status = status::success;
 
     //
-    // The systemm must ignore children signaling coming from process forking.
-    //
-    signal(SIGCHLD, SIG_IGN);
-
-    //
     // The system handles 'Ctrl-C' and 'kill' commands by itself.
     //
     sigset_t termination_signals_mask;

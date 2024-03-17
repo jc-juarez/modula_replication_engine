@@ -69,6 +69,7 @@ CMakeFiles/modula.dir/src/replication_engine.cc.o: ../src/replication_engine.cc
 CMakeFiles/modula.dir/src/replication_engine.cc.o: ../src/replication_engine.hh
 CMakeFiles/modula.dir/src/replication_engine.cc.o: ../src/replication_task.hh
 CMakeFiles/modula.dir/src/replication_engine.cc.o: ../src/status.hh
+CMakeFiles/modula.dir/src/replication_engine.cc.o: ../src/synchronization_manager.hh
 CMakeFiles/modula.dir/src/replication_engine.cc.o: ../src/thread_pool.hh
 CMakeFiles/modula.dir/src/replication_engine.cc.o: ../src/timestamp.hh
 CMakeFiles/modula.dir/src/replication_engine.cc.o: ../src/utilities.hh
@@ -90,6 +91,14 @@ CMakeFiles/modula.dir/src/replication_task.cc.o: ../src/replication_task.hh
 CMakeFiles/modula.dir/src/replication_task.cc.o: ../src/status.hh
 CMakeFiles/modula.dir/src/replication_task.cc.o: ../src/timestamp.hh
 CMakeFiles/modula.dir/src/replication_task.cc.o: ../src/utilities.hh
+
+CMakeFiles/modula.dir/src/synchronization_manager.cc.o: ../src/logger.hh
+CMakeFiles/modula.dir/src/synchronization_manager.cc.o: ../src/random_identifier_generator.hh
+CMakeFiles/modula.dir/src/synchronization_manager.cc.o: ../src/status.hh
+CMakeFiles/modula.dir/src/synchronization_manager.cc.o: ../src/synchronization_manager.cc
+CMakeFiles/modula.dir/src/synchronization_manager.cc.o: ../src/synchronization_manager.hh
+CMakeFiles/modula.dir/src/synchronization_manager.cc.o: ../src/timestamp.hh
+CMakeFiles/modula.dir/src/synchronization_manager.cc.o: ../src/utilities.hh
 
 CMakeFiles/modula.dir/src/system_configuration.cc.o: ../src/logger.hh
 CMakeFiles/modula.dir/src/system_configuration.cc.o: ../src/random_identifier_generator.hh

@@ -176,9 +176,14 @@ public:
     static constexpr status_code filesystem_object_does_not_exist = 0x8'0000018;
 
     //
-    // Failure to enqueue a task into a thread pool.
+    // Failed to enqueue a task into a thread pool.
     //
     static constexpr status_code thread_pool_enqueue_process_failed = 0x8'0000019;
+
+    //
+    // Failed to open an IPC pipe for an rsync process.
+    //
+    static constexpr status_code rsync_pipe_connection_failed = 0x8'0000020;
 
 };
 

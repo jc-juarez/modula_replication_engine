@@ -8,6 +8,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/modula.dir/src/replication_engine.cc.o"
   "CMakeFiles/modula.dir/src/replication_manager.cc.o"
   "CMakeFiles/modula.dir/src/replication_task.cc.o"
+  "CMakeFiles/modula.dir/src/synchronization_manager.cc.o"
   "CMakeFiles/modula.dir/src/system_configuration.cc.o"
   "CMakeFiles/modula.dir/src/thread_pool.cc.o"
   "CMakeFiles/modula.dir/src/timestamp.cc.o"

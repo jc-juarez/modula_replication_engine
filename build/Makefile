@@ -366,6 +366,33 @@ src/replication_task.cc.s:
 	$(MAKE) -f CMakeFiles/modula.dir/build.make CMakeFiles/modula.dir/src/replication_task.cc.s
 .PHONY : src/replication_task.cc.s
 
+src/synchronization_manager.o: src/synchronization_manager.cc.o
+
+.PHONY : src/synchronization_manager.o
+
+# target to build an object file
+src/synchronization_manager.cc.o:
+	$(MAKE) -f CMakeFiles/modula.dir/build.make CMakeFiles/modula.dir/src/synchronization_manager.cc.o
+.PHONY : src/synchronization_manager.cc.o
+
+src/synchronization_manager.i: src/synchronization_manager.cc.i
+
+.PHONY : src/synchronization_manager.i
+
+# target to preprocess a source file
+src/synchronization_manager.cc.i:
+	$(MAKE) -f CMakeFiles/modula.dir/build.make CMakeFiles/modula.dir/src/synchronization_manager.cc.i
+.PHONY : src/synchronization_manager.cc.i
+
+src/synchronization_manager.s: src/synchronization_manager.cc.s
+
+.PHONY : src/synchronization_manager.s
+
+# target to generate assembly for a file
+src/synchronization_manager.cc.s:
+	$(MAKE) -f CMakeFiles/modula.dir/build.make CMakeFiles/modula.dir/src/synchronization_manager.cc.s
+.PHONY : src/synchronization_manager.cc.s
+
 src/system_configuration.o: src/system_configuration.cc.o
 
 .PHONY : src/system_configuration.o
@@ -510,6 +537,9 @@ help:
 	@echo "... src/replication_task.o"
 	@echo "... src/replication_task.i"
 	@echo "... src/replication_task.s"
+	@echo "... src/synchronization_manager.o"
+	@echo "... src/synchronization_manager.i"
+	@echo "... src/synchronization_manager.s"
 	@echo "... src/system_configuration.o"
 	@echo "... src/system_configuration.i"
 	@echo "... src/system_configuration.s"

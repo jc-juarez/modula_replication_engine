@@ -13,6 +13,7 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/home/jcjuarez/modula/src/replication_engine.cc" "/home/jcjuarez/modula/build/CMakeFiles/modula.dir/src/replication_engine.cc.o"
   "/home/jcjuarez/modula/src/replication_manager.cc" "/home/jcjuarez/modula/build/CMakeFiles/modula.dir/src/replication_manager.cc.o"
   "/home/jcjuarez/modula/src/replication_task.cc" "/home/jcjuarez/modula/build/CMakeFiles/modula.dir/src/replication_task.cc.o"
+  "/home/jcjuarez/modula/src/synchronization_manager.cc" "/home/jcjuarez/modula/build/CMakeFiles/modula.dir/src/synchronization_manager.cc.o"
   "/home/jcjuarez/modula/src/system_configuration.cc" "/home/jcjuarez/modula/build/CMakeFiles/modula.dir/src/system_configuration.cc.o"
   "/home/jcjuarez/modula/src/thread_pool.cc" "/home/jcjuarez/modula/build/CMakeFiles/modula.dir/src/thread_pool.cc.o"
   "/home/jcjuarez/modula/src/timestamp.cc" "/home/jcjuarez/modula/build/CMakeFiles/modula.dir/src/timestamp.cc.o"

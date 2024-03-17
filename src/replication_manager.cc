@@ -104,11 +104,10 @@ replication_manager::append_entry_to_replication_engines_router(
 
 void
 replication_manager::replication_tasks_entry_point(
-    const std::string& p_activity_id,
     file_descriptor p_watch_descriptor,
     std::unique_ptr<replication_task>&& p_replication_task)
 {
-    logger::set_activity_id(p_activity_id);
+    logger::set_activity_id(p_replication_task->m_activity_id);
 
     logger::log(log_level::info, std::format("Received replication task to process. FilesystemObjectName={}.",
         p_replication_task->get_filesystem_object_name()));

@@ -417,17 +417,21 @@ filesystem_monitor::replication_tasks_dispatcher()
             const filesystem_event& current_filesystem_event = filesystem_events_batching_queue.front();
             const file_descriptor watch_descriptor = current_filesystem_event.m_watch_descriptor;
 
-            std::unique_ptr<replication_task> current_replication_task = std::make_unique<replication_task>(
-                current_filesystem_event.m_replication_action,
-                current_filesystem_event.m_filesystem_object_name);
-
-            filesystem_events_batching_queue.pop();
-
             //
             // Generate an identifier for the replication task and attach it to the current thread.
             //
             const std::string activity_id = m_random_identifier_generator.generate_triple_random_identifier();
             logger::set_activity_id(activity_id); 
+
+            std::unique_ptr<replication_task> current_replication_task = std::make_unique<replication_task>(
+                current_filesystem_event.m_replication_action,
+                current_filesystem_event.m_filesystem_object_name,
+                activity_id);
+
+            //
+            // Remove event from the queue in a bathching model.
+            //
+            filesystem_events_batching_queue.pop();
 
             logger::log(log_level::info, std::format("Created replication task. FilesystemObjectName={}, ReplicationAction={}, WatchDescriptor={}, CreationTime={}.",
                 current_replication_task->get_filesystem_object_name(),
@@ -439,10 +443,9 @@ filesystem_monitor::replication_tasks_dispatcher()
             // Enqueue the replication task in the thread pool for asynchronous execution and ownership transfer.
             //
             std::optional<std::future<void>> enqueue_status = m_dispatcher_thread_pool->enqueue_task(
-                [this, activity_id, watch_descriptor, replication_task = std::move(current_replication_task)]() mutable
+                [this, watch_descriptor, replication_task = std::move(current_replication_task)]() mutable
                 {
                     this->m_replication_manager->replication_tasks_entry_point(
-                        activity_id,
                         watch_descriptor,
                         std::move(replication_task));
                 }

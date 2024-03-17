@@ -12,13 +12,15 @@ namespace modula
 
 replication_task::replication_task(
     const replication_action p_replication_action,
-    const std::string& p_filesystem_object_name) :
-    m_replication_action(p_replication_action),
-    m_filesystem_object_name(p_filesystem_object_name),
-    m_creation_timestamp(timestamp::get_current_time()),
-    m_end_timestamp(timestamp::generate_invalid_timestamp()),
-    m_last_error_timestamp(timestamp::generate_invalid_timestamp()),
-    m_filesystem_object_path("")
+    const std::string& p_filesystem_object_name,
+    const std::string& p_activity_id)
+     : m_replication_action(p_replication_action),
+       m_filesystem_object_name(p_filesystem_object_name),
+       m_activity_id(p_activity_id),
+       m_creation_timestamp(timestamp::get_current_time()),
+       m_end_timestamp(timestamp::generate_invalid_timestamp()),
+       m_last_error_timestamp(timestamp::generate_invalid_timestamp()),
+       m_filesystem_object_path("")
 {}
 
 replication_action

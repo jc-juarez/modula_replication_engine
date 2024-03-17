@@ -63,7 +63,8 @@ public:
     //
     replication_task(
         const replication_action p_replication_action,
-        const std::string& p_filesystem_object_name);
+        const std::string& p_filesystem_object_name,
+        const std::string& p_activity_id);
 
     //
     // Gets the replication action of the replication task.
@@ -97,6 +98,11 @@ public:
     // Filesystem object to replicate path.
     //
     std::string m_filesystem_object_path;
+
+    //
+    // Activity ID corresponding to the replication task.
+    //
+    std::string m_activity_id;
 
 private:
 

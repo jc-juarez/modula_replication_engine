@@ -7,8 +7,8 @@
 
 #include "logger.hh"
 #include "replication_engine.hh"
+#include "synchronization_manager.hh"
 
-#include <cstdlib> // Remove after rsync wrapper is added.
 #include <filesystem>
 
 namespace modula
@@ -128,6 +128,7 @@ replication_engine::replicate_filesystem_object(
     const character* p_target_directory_path,
     std::unique_ptr<replication_task>& p_replication_task)
 {
+    logger::set_activity_id(p_replication_task->m_activity_id);
     status_code status = status::success;
 
     logger::log(log_level::info, std::format("Starting filesystem object replication. "
@@ -138,9 +139,9 @@ replication_engine::replicate_filesystem_object(
     //
     // Send an rsync replication command for handling replications.
     //
-    std::string rsync_command = "rsync -avz " + p_replication_task->m_filesystem_object_path + " " + p_target_directory_path;
-
-    std::system(rsync_command.c_str());
+    synchronization_result filesytem_object_synchronization_result = synchronization_manager::execute_synchronization_action(
+        p_replication_task->m_filesystem_object_path.c_str(),
+        p_target_directory_path);
 
     return status;
 }

@@ -70,6 +70,7 @@ CMakeFiles/modula.dir/src/replication_engine.cc.o
  /home/jcjuarez/modula/src/replication_engine.hh
  /home/jcjuarez/modula/src/replication_task.hh
  /home/jcjuarez/modula/src/status.hh
+ /home/jcjuarez/modula/src/synchronization_manager.hh
  /home/jcjuarez/modula/src/thread_pool.hh
  /home/jcjuarez/modula/src/timestamp.hh
  /home/jcjuarez/modula/src/utilities.hh
@@ -89,6 +90,14 @@ CMakeFiles/modula.dir/src/replication_task.cc.o
  /home/jcjuarez/modula/src/replication_task.cc
  /home/jcjuarez/modula/src/replication_task.hh
  /home/jcjuarez/modula/src/status.hh
+ /home/jcjuarez/modula/src/timestamp.hh
+ /home/jcjuarez/modula/src/utilities.hh
+CMakeFiles/modula.dir/src/synchronization_manager.cc.o
+ /home/jcjuarez/modula/src/logger.hh
+ /home/jcjuarez/modula/src/random_identifier_generator.hh
+ /home/jcjuarez/modula/src/status.hh
+ /home/jcjuarez/modula/src/synchronization_manager.cc
+ /home/jcjuarez/modula/src/synchronization_manager.hh
  /home/jcjuarez/modula/src/timestamp.hh
  /home/jcjuarez/modula/src/utilities.hh
 CMakeFiles/modula.dir/src/system_configuration.cc.o
