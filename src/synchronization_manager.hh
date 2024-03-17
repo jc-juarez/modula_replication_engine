@@ -42,6 +42,11 @@ struct synchronization_result
     //
     uint32 m_bytes_transferred;
 
+    //
+    // Number of bytes synchronized and transferred.
+    //
+    single_precision m_bytes_per_second;
+
 };
 
 //
@@ -62,9 +67,9 @@ public:
     //
     static
     synchronization_result
-    execute_synchronization_action(
-        const character* p_filesystem_object_path,
-        const character* p_target_directory_path);
+    execute_synchronization_task(
+        const character* p_target_directory_path,
+        std::unique_ptr<replication_task>& p_replication_task);
 
 private:
 
@@ -72,6 +77,11 @@ private:
     // Max size for the reading buffer for the rysnc IPC result.
     //
     static constexpr uint16 c_rsync_result_buffer_size = 4096u;
+
+    //
+    // Regex rsync data pattern for synchronization information.
+    //
+    static constexpr const character* c_rsync_data_pattern = R"(sent (\d+) bytes.*?(\d+(\.\d+)?) bytes/sec)";
     
 };
 

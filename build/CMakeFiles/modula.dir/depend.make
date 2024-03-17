@@ -94,6 +94,7 @@ CMakeFiles/modula.dir/src/replication_task.cc.o: ../src/utilities.hh
 
 CMakeFiles/modula.dir/src/synchronization_manager.cc.o: ../src/logger.hh
 CMakeFiles/modula.dir/src/synchronization_manager.cc.o: ../src/random_identifier_generator.hh
+CMakeFiles/modula.dir/src/synchronization_manager.cc.o: ../src/replication_task.hh
 CMakeFiles/modula.dir/src/synchronization_manager.cc.o: ../src/status.hh
 CMakeFiles/modula.dir/src/synchronization_manager.cc.o: ../src/synchronization_manager.cc
 CMakeFiles/modula.dir/src/synchronization_manager.cc.o: ../src/synchronization_manager.hh

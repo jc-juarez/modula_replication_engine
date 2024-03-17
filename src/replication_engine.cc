@@ -52,18 +52,25 @@ replication_engine::execute_replication_task(
 
     p_replication_task->m_filesystem_object_path = get_source_directory_path() + "/" + p_replication_task->get_filesystem_object_name();
 
-    if (!std::filesystem::exists(p_replication_task->m_filesystem_object_path))
+    //
+    // Current existence validation check should only be performed for non-remove
+    // actions since a remove action has already deleted the object from the filesystem.
+    //
+    if (p_replication_task->get_replication_action() != replication_action::remove)
     {
-        status = status::filesystem_object_does_not_exist;
+        if (!std::filesystem::exists(p_replication_task->m_filesystem_object_path))
+        {
+            status = status::filesystem_object_does_not_exist;
 
-        p_replication_task->m_last_error_timestamp = timestamp::get_current_time();
+            p_replication_task->set_last_error_timestamp(timestamp::get_current_time());
 
-        logger::log(log_level::error, std::format("Filesystem object to replicate does not exist. "
-            "FilesystemObjectPath={}, Status={:#X}.",
-            p_replication_task->m_filesystem_object_path.c_str(),
-            status));
+            logger::log(log_level::error, std::format("Filesystem object to replicate does not exist. "
+                "FilesystemObjectPath={}, Status={:#X}.",
+                p_replication_task->m_filesystem_object_path.c_str(),
+                status));
 
-        return status;
+            return status;
+        }
     }
 
     return enqueue_distributed_replication_tasks(p_replication_task);
@@ -129,7 +136,6 @@ replication_engine::replicate_filesystem_object(
     std::unique_ptr<replication_task>& p_replication_task)
 {
     logger::set_activity_id(p_replication_task->m_activity_id);
-    status_code status = status::success;
 
     logger::log(log_level::info, std::format("Starting filesystem object replication. "
         "FilesystemObjectPath={}, TargetDirectoryPath={}.",
@@ -137,11 +143,35 @@ replication_engine::replicate_filesystem_object(
         p_target_directory_path));
 
     //
-    // Send an rsync replication command for handling replications.
+    // Send an rsync synchronization command for handling replications.
     //
-    synchronization_result filesytem_object_synchronization_result = synchronization_manager::execute_synchronization_action(
-        p_replication_task->m_filesystem_object_path.c_str(),
-        p_target_directory_path);
+    synchronization_result filesytem_object_synchronization_result = synchronization_manager::execute_synchronization_task(
+        p_target_directory_path,
+        p_replication_task);
+
+    status_code& status = filesytem_object_synchronization_result.m_status;
+
+    if (status::succeeded(status))
+    {
+        logger::log(log_level::info, std::format("Filesystem object replication succeeded. "
+            "FilesystemObjectPath={}, TargetDirectoryPath={}, StartTime={}, EndTime={}, BytesTransferred={}, BytesPerSecond={:.2f}.",
+            p_replication_task->m_filesystem_object_path.c_str(),
+            p_target_directory_path,
+            filesytem_object_synchronization_result.m_start_timestamp.to_string(),
+            filesytem_object_synchronization_result.m_end_timestamp.to_string(),
+            filesytem_object_synchronization_result.m_bytes_transferred,
+            filesytem_object_synchronization_result.m_bytes_per_second));
+    }
+    else
+    {
+        logger::log(log_level::error, std::format("Filesystem object replication failed. "
+            "FilesystemObjectPath={}, TargetDirectoryPath={}, StartTime={}, EndTime={}. Status={:#X}.",
+            p_replication_task->m_filesystem_object_path.c_str(),
+            p_target_directory_path,
+            filesytem_object_synchronization_result.m_start_timestamp.to_string(),
+            filesytem_object_synchronization_result.m_end_timestamp.to_string(),
+            status));
+    }
 
     return status;
 }

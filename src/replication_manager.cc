@@ -136,7 +136,7 @@ replication_manager::parse_initial_configuration_file_into_memory(
     
     directory source_directory("/home/jcjuarez/mock1");
 
-    std::vector<directory> target_directories {directory("/home/jcjuarez/mock2") /*, directory("/home/jcjuarez/mock3")*/};
+    std::vector<directory> target_directories {directory("/home/jcjuarez/mock2"), directory("/home/jcjuarez/mock3")};
 
     replication_engine replication_engine(
         std::move(source_directory),
@@ -162,7 +162,7 @@ replication_manager::send_replication_task(
     {
         status = status::unknown_watch_descriptor;
 
-        p_replication_task->m_last_error_timestamp = timestamp::get_current_time();
+        p_replication_task->set_last_error_timestamp(timestamp::get_current_time());
 
         logger::log(log_level::error, std::format("Watch descriptor is not present in the replication engines router. "
             "FilesystemObjectName={}, WatchDescriptor={}, Status={:#X}.",

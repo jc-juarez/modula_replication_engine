@@ -185,6 +185,11 @@ public:
     //
     static constexpr status_code rsync_pipe_connection_failed = 0x8'0000020;
 
+    //
+    // The spawned rsync process failed the synchronization task.
+    //
+    static constexpr status_code rsync_spawned_process_failed = 0x8'0000021;
+
 };
 
 } // namespace modula.

@@ -83,7 +83,7 @@ private:
     // running system components must listen to this configuration setting.
     //
     static
-    bool
+    std::atomic<bool>
     s_stop_system_execution;
     
 };

@@ -11,6 +11,7 @@
 #include "utilities.hh"
 #include "timestamp.hh"
 
+#include <mutex>
 #include <string>
 #include <memory>
 
@@ -85,14 +86,22 @@ public:
     get_creation_time() const;
 
     //
+    // Gets the last error timestamp of the replication task.
+    //
+    timestamp
+    get_last_error_timestamp() const;
+
+    //
+    // Sets the last error timestamp in a thread safe manner.
+    //
+    void
+    set_last_error_timestamp(
+        const timestamp& p_last_error_timestamp);
+
+    //
     // Timestamp for the end of the replication task.
     //
     timestamp m_end_timestamp;
-
-    //
-    // Timestamp for last encountered error.
-    //
-    timestamp m_last_error_timestamp;
 
     //
     // Filesystem object to replicate path.
@@ -115,6 +124,17 @@ private:
     // Name of the filesystem object tied to the task.
     //
     std::string m_filesystem_object_name;
+
+    //
+    // Lock for synchronizing access across threads.
+    //
+    std::mutex m_lock;
+
+    //
+    // Timestamp for the last encountered error.
+    // Might be modified across threads, so protection is required.
+    //
+    timestamp m_last_error_timestamp;
 
     //
     // Timestamp for the creation of the replication task.

@@ -95,6 +95,7 @@ CMakeFiles/modula.dir/src/replication_task.cc.o
 CMakeFiles/modula.dir/src/synchronization_manager.cc.o
  /home/jcjuarez/modula/src/logger.hh
  /home/jcjuarez/modula/src/random_identifier_generator.hh
+ /home/jcjuarez/modula/src/replication_task.hh
  /home/jcjuarez/modula/src/status.hh
  /home/jcjuarez/modula/src/synchronization_manager.cc
  /home/jcjuarez/modula/src/synchronization_manager.hh

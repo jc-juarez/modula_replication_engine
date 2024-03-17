@@ -41,4 +41,19 @@ replication_task::get_creation_time() const
     return m_creation_timestamp;
 }
 
+timestamp
+replication_task::get_last_error_timestamp() const
+{
+    return m_last_error_timestamp;
+}
+
+void
+replication_task::set_last_error_timestamp(
+    const timestamp& p_last_error_timestamp)
+{
+    std::scoped_lock<std::mutex> lock(m_lock);
+
+    m_last_error_timestamp = p_last_error_timestamp;
+}
+
 } // namespace modula.

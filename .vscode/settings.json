@@ -67,6 +67,8 @@
         "semaphore": "cpp",
         "unordered_set": "cpp",
         "csignal": "cpp",
-        "map": "cpp"
+        "map": "cpp",
+        "bitset": "cpp",
+        "regex": "cpp"
     }
 }

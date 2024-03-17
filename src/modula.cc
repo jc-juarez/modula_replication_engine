@@ -19,7 +19,7 @@ namespace modula
 //
 // Initial state for the stop system execution configuration.
 //
-bool modula::s_stop_system_execution = false;
+std::atomic<bool> modula::s_stop_system_execution = false;
 
 modula::modula(
     status_code* p_status)
